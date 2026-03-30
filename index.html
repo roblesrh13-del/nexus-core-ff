@@ -1,0 +1,2318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CORE NEXUS FF Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- html2canvas removed - using native Canvas API -->
+    <style>
+      /* Base Settings */
+      body {
+        font-family: 'Inter', sans-serif; /* UI Font */
+        background-color: #121212;
+        color: #e5e5e5;
+        padding-bottom: 90px; /* Space for bottom nav */
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      /* Gamer Font for specific headers */
+      .font-gamer { font-family: 'Orbitron', sans-serif; }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: #1a1a1a; }
+      ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+      
+      /* Hide scrollbar for horizontal scroll areas but keep functionality */
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+      /* Animations */
+      .fade-in { animation: fadeIn 0.2s ease-out; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+      /* Input Styles */
+      .input-modern {
+          background: #1e1e1e;
+          border: 1px solid #333;
+          color: white;
+          border-radius: 8px;
+          padding: 10px 12px;
+          font-size: 14px;
+          transition: all 0.2s;
+          width: 100%;
+          outline: none;
+      }
+      .input-modern:focus {
+          border-color: #ea580c;
+          background: #252525;
+      }
+      
+      .input-compact {
+          background: #121212;
+          border: 1px solid #333;
+          color: white;
+          border-radius: 4px;
+          padding: 4px;
+          font-size: 12px;
+          text-align: center;
+          width: 100%;
+          outline: none;
+          transition: border-color 0.2s;
+      }
+      .input-compact:focus { border-color: #ea580c; }
+      
+      /* Remove arrows from number inputs */
+      input[type=number]::-webkit-inner-spin-button, 
+      input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none; 
+        margin: 0; 
+      }
+      input[type=number] {
+        -moz-appearance: textfield;
+      }
+
+      /* Card Style */
+      .card {
+          background: #1e1e1e;
+          border: 1px solid #2a2a2a;
+          border-radius: 12px;
+          padding: 16px;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      }
+
+      /* File Upload Button */
+      .file-upload-btn {
+          position: relative;
+          overflow: hidden;
+          cursor: pointer;
+          background-size: cover;
+          background-position: center;
+      }
+      .file-upload-btn input[type=file] {
+          position: absolute;
+          top: 0; left: 0; width: 100%; height: 100%;
+          opacity: 0;
+          cursor: pointer;
+          z-index: 10;
+      }
+
+      /* Template Selector Active State */
+      .template-btn.active {
+          border-color: #ea580c;
+          background-color: #2a1a10;
+          box-shadow: 0 0 10px rgba(234, 88, 12, 0.2);
+      }
+    </style>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- LANDING PAGE VIEW -->
+    <div id="landing-wrapper" class="fixed inset-0 z-[100] bg-[#0a0a0a] flex flex-col overflow-y-auto">
+        <!-- Language Selector (Top Right) -->
+        <div class="absolute top-6 right-6 z-[110] flex gap-2">
+            <button onclick="setLanguage('es')" class="px-3 py-1.5 rounded-full bg-[#1a1a1a] border border-[#333] text-[10px] font-bold text-white hover:border-orange-500 transition-all">ES</button>
+            <button onclick="setLanguage('en')" class="px-3 py-1.5 rounded-full bg-[#1a1a1a] border border-[#333] text-[10px] font-bold text-white hover:border-orange-500 transition-all">EN</button>
+        </div>
+
+        <!-- Hero Section -->
+        <section class="relative min-h-screen flex flex-col items-center px-6 py-12 md:py-24 text-center">
+            <!-- Background Glows -->
+            <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-orange-600/20 blur-[120px] rounded-full pointer-events-none"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-600/10 blur-[120px] rounded-full pointer-events-none"></div>
+            
+            <div class="relative z-10 max-w-2xl mx-auto flex flex-col items-center justify-center flex-1">
+                <div class="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-orange-600 flex items-center justify-center shadow-2xl shadow-orange-900/50 mb-8 animate-bounce">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 md:h-12 md:w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z" />
+                    </svg>
+                </div>
+                
+                <h1 class="text-4xl md:text-7xl font-black text-white tracking-tighter font-gamer mb-4">
+                    CORE <span class="text-orange-500">NEXUS</span> FF
+                </h1>
+                <p class="text-gray-400 text-base md:text-xl mb-10 max-w-lg mx-auto leading-relaxed" data-t="landing_desc">
+                    The ultimate tournament management engine for Free Fire organizers. Professional boards, automated scoring, and instant exports.
+                </p>
+
+                <!-- Login Button Container -->
+                <div class="flex flex-col items-center gap-4 w-full max-w-xs mx-auto">
+                    <div id="auth-login-section" class="flex flex-col items-center gap-4 w-full">
+                        <button onclick="guestLogin()" class="w-full py-4 rounded-full bg-orange-600 text-white font-bold hover:bg-orange-700 transition-all shadow-xl shadow-orange-900/40 flex items-center justify-center gap-2">
+                            <span data-t="landing_enter">ENTRAR A LA APP</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <p class="text-gray-500 text-[10px] uppercase tracking-widest mt-2" data-t="landing_access_local">Acceso Local • Sin Registro</p>
+                    </div>
+
+                    <div id="auth-logged-section" class="hidden flex flex-col items-center gap-4 w-full">
+                        <button onclick="checkAuth()" class="w-full py-4 rounded-full bg-orange-600 text-white font-bold hover:bg-orange-700 transition-all shadow-xl shadow-orange-900/40 flex items-center justify-center gap-2">
+                            <span data-t="landing_back_panel">VOLVER AL PANEL</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <button onclick="logout()" class="text-gray-500 hover:text-white text-xs font-medium transition-colors" data-t="landing_logout">
+                            Cerrar Sesión
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How it Works Section -->
+            <div class="relative z-10 w-full max-w-5xl mx-auto mt-24 md:mt-32 px-4">
+                <h2 class="text-2xl md:text-4xl font-black text-white tracking-tight font-gamer mb-12 text-center" data-t="how_it_works_title">Cómo Funciona</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-full bg-orange-600/20 border border-orange-600/50 flex items-center justify-center text-orange-500 font-bold mb-4">1</div>
+                        <h4 class="text-white font-bold mb-2" data-t="how_it_works_step1_title">Configura tu Torneo</h4>
+                        <p class="text-gray-500 text-xs md:text-sm" data-t="how_it_works_step1_desc">Define el nombre, fecha, premios y elige uno de nuestros temas profesionales.</p>
+                    </div>
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-full bg-blue-600/20 border border-blue-600/50 flex items-center justify-center text-blue-500 font-bold mb-4">2</div>
+                        <h4 class="text-white font-bold mb-2" data-t="how_it_works_step2_title">Registra los Equipos</h4>
+                        <p class="text-gray-500 text-xs md:text-sm" data-t="how_it_works_step2_desc">Añade los equipos participantes y registra sus eliminaciones y posición en cada partida.</p>
+                    </div>
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-12 h-12 rounded-full bg-purple-600/20 border border-purple-600/50 flex items-center justify-center text-purple-500 font-bold mb-4">3</div>
+                        <h4 class="text-white font-bold mb-2" data-t="how_it_works_step3_title">Genera y Comparte</h4>
+                        <p class="text-gray-500 text-xs md:text-sm" data-t="how_it_works_step3_desc">La app calcula los puntos automáticamente. Exporta tablas en PNG de alta calidad al instante.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto mt-16 md:mt-24 px-4">
+                <div class="card bg-[#121212] border-[#222] p-6 md:p-8 text-left">
+                    <div class="text-orange-500 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-bold mb-2 text-sm md:text-base" data-t="feat_results_title">Resultados Al Instante</h3>
+                    <p class="text-gray-500 text-xs md:text-sm" data-t="feat_results_desc">Cálculo automático de puntos basado en reglas oficiales de posición y eliminaciones.</p>
+                </div>
+                <div class="card bg-[#121212] border-[#222] p-6 md:p-8 text-left">
+                    <div class="text-blue-500 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-bold mb-2 text-sm md:text-base" data-t="feat_graphics_title">Gráficos Pro</h3>
+                    <p class="text-gray-500 text-xs md:text-sm" data-t="feat_graphics_desc">Genera tablas en alta resolución PNG para resultados, top 3 y patrocinadores.</p>
+                </div>
+                <div class="card bg-[#121212] border-[#222] p-6 md:p-8 text-left">
+                    <div class="text-purple-500 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-bold mb-2 text-sm md:text-base" data-t="feat_themes_title">Multi-Tema</h3>
+                    <p class="text-gray-500 text-xs md:text-sm" data-t="feat_themes_desc">Elige entre más de 14 temas personalizados para que coincidan con la vibra de tu torneo.</p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="relative z-10 mt-16 md:mt-32 pb-12 text-gray-600 text-[10px] md:text-xs uppercase tracking-widest" data-t="footer_built_for">
+                Creado para la comunidad competitiva • v7.3
+            </div>
+        </section>
+    </div>
+
+    <!-- MAIN APP WRAPPER -->
+    <div id="app-wrapper" class="hidden flex-1 flex flex-col">
+        <!-- Top App Bar -->
+        <header class="bg-[#1a1a1a] border-b border-[#333] sticky top-0 z-50">
+        <div class="px-4 py-3 flex justify-between items-center max-w-7xl mx-auto">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-orange-600 flex items-center justify-center shadow-lg shadow-orange-900/50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z" />
+                    </svg>
+                </div>
+                <h1 class="text-lg font-bold text-white tracking-wide font-gamer"><span id="app-header-title">CORE NEXUS</span> <span class="text-orange-500 text-xs font-normal align-middle ml-1" data-t="header_manager">GESTOR</span></h1>
+            </div>
+            <div class="flex items-center gap-2 md:gap-4">
+                <div class="hidden sm:flex flex-col items-end leading-none">
+                    <span class="text-[8px] text-gray-500 uppercase font-bold tracking-tighter">Apoya el proyecto</span>
+                    <span class="text-[7px] text-gray-400 italic">Donaciones motivan actualizaciones</span>
+                </div>
+                <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=underfireclaneu@gmail.com&item_name=Donacion+CORE+NEXUS+FF&currency_code=EUR" 
+                   target="_blank" 
+                   class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all shadow-lg shadow-blue-900/20 group"
+                   title="Sus donaciones motivan a seguir actualizando la aplicación y agradeciendo">
+                    <svg class="w-3 h-3 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.723a1.06 1.06 0 0 1 1.05-.91h8.176c1.596 0 2.97.13 4.141.391 1.212.27 2.025.896 2.454 1.892.227.53.307 1.15.243 1.877-.031.351-.08.702-.148 1.052-.4 2.075-1.279 3.622-2.635 4.64-1.356 1.018-3.275 1.527-5.758 1.527h-1.818a.592.592 0 0 0-.58.488l-.19.966-1.054 5.316c-.04.206-.222.355-.432.355h-1.688zm10.748-14.045c.039-.446.002-.805-.111-1.07-.227-.53-.782-.821-1.674-.871-1.171-.066-2.682-.04-4.541-.04h-6.67l-2.54 16.424h3.099l1.477-9.429a.592.592 0 0 1 .58-.488h2.339c1.969 0 3.516-.48 4.641-1.441 1.125-.961 1.841-2.258 2.15-3.895.052-.27.085-.538.1-.803z"/>
+                    </svg>
+                    <span>DONAR</span>
+                </a>
+                <button onclick="goHome()" class="text-gray-400 hover:text-white transition-colors p-1" title="Inicio">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Group Selector (Horizontal Scroll) -->
+        <div class="px-2 pb-2 bg-[#1a1a1a]">
+            <div id="group-selector" class="flex gap-2 overflow-x-auto no-scrollbar py-1 px-2">
+                <!-- Injected by JS -->
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-md md:max-w-4xl mx-auto w-full p-4">
+
+        <!-- VIEW: LEADERBOARD -->
+        <div id="view-leaderboard" class="fade-in hidden w-full flex-col items-center">
+             
+             <!-- Action Bar -->
+             <div class="w-full flex justify-between items-center mb-4">
+                 <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider" data-t="view_results_title">Tabla de Resultados</h2>
+                 <button onclick="downloadCanvas('results')" class="bg-orange-600 active:bg-orange-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-lg shadow-orange-900/30 flex items-center gap-2 transition-transform active:scale-95">
+                    <span data-t="btn_save_board">GUARDAR TABLA</span>
+                </button>
+             </div>
+
+             <!-- Capture Area: Leaderboard -->
+             <div class="w-full overflow-x-auto rounded-2xl shadow-2xl bg-black mb-10 border border-zinc-800">
+                 <div id="preview-results" class="min-w-[550px] w-[550px] mx-auto bg-black flex justify-center">
+                    <!-- Canvas injected here -->
+                 </div>
+             </div>
+
+             <!-- Action Bar Top 3 -->
+             <div class="w-full flex justify-between items-center mb-4 border-t border-zinc-800 pt-6">
+                <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider" data-t="view_top3_title">Banner Top 3</h2>
+                <button onclick="downloadCanvas('top3')" class="bg-yellow-500 active:bg-yellow-600 text-black px-3 py-2 rounded-lg text-xs font-bold shadow-lg shadow-yellow-900/30 flex items-center gap-2 transition-transform active:scale-95">
+                   <span data-t="btn_save_top3">GUARDAR TOP 3</span>
+               </button>
+            </div>
+
+             <!-- Capture Area: Top 3 Banner -->
+             <div class="w-full overflow-x-auto rounded-2xl shadow-2xl bg-black mb-10 border border-zinc-800">
+                <div id="preview-top3" class="min-w-[550px] w-[550px] mx-auto bg-black flex justify-center">
+                    <!-- Canvas injected here -->
+                </div>
+            </div>
+
+            <!-- Action Bar Confirmed Teams -->
+            <div class="w-full flex justify-between items-center mb-4 border-t border-zinc-800 pt-6">
+                <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider" data-t="view_confirmed_title">Equipos Confirmados</h2>
+                <button onclick="downloadCanvas('confirmed')" class="bg-blue-600 active:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-lg shadow-blue-900/30 flex items-center gap-2 transition-transform active:scale-95">
+                   <span data-t="btn_save_teams">GUARDAR EQUIPOS</span>
+               </button>
+            </div>
+
+             <!-- Capture Area: Confirmed Teams -->
+             <div class="w-full overflow-x-auto rounded-2xl shadow-2xl bg-black mb-8 border border-zinc-800">
+                <div id="preview-confirmed" class="min-w-[550px] w-[550px] mx-auto bg-black flex justify-center">
+                    <!-- Canvas injected here -->
+                </div>
+            </div>
+
+            <!-- Action Bar Presentation -->
+            <div class="w-full flex justify-between items-center mb-4 border-t border-zinc-800 pt-6">
+                <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider" data-t="view_presentation_title">Presentación</h2>
+                <button onclick="downloadCanvas('presentation')" class="bg-purple-600 active:bg-purple-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-lg shadow-purple-900/30 flex items-center gap-2 transition-transform active:scale-95">
+                   <span data-t="btn_save_info">GUARDAR INFO</span>
+               </button>
+            </div>
+
+             <!-- Capture Area: Presentation -->
+             <div class="w-full overflow-x-auto rounded-2xl shadow-2xl bg-black mb-8 border border-zinc-800">
+                <div id="preview-presentation" class="min-w-[550px] w-[550px] mx-auto bg-black flex justify-center">
+                    <!-- Canvas injected here -->
+                </div>
+            </div>
+
+            <!-- Action Bar Sponsors -->
+            <div class="w-full flex justify-between items-center mb-4 border-t border-zinc-800 pt-6">
+                <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider" data-t="view_partners_title">Socios Oficiales</h2>
+                <button onclick="downloadCanvas('sponsors')" class="bg-emerald-600 active:bg-emerald-700 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-lg shadow-emerald-900/30 flex items-center gap-2 transition-transform active:scale-95">
+                   <span data-t="btn_save_sponsors">GUARDAR SPONSORS</span>
+               </button>
+            </div>
+
+             <!-- Capture Area: Sponsors -->
+             <div class="w-full overflow-x-auto rounded-2xl shadow-2xl bg-black mb-8 border border-zinc-800">
+                <div id="preview-sponsors" class="min-w-[550px] w-[550px] mx-auto bg-black flex justify-center">
+                    <!-- Canvas injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: EDITOR (Data Entry) -->
+        <div id="view-register" class="fade-in hidden w-full">
+            <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <span class="w-1 h-6 bg-orange-600 rounded-full block"></span>
+                Edit Group <span id="reg-group-title" class="text-orange-500">A</span>
+            </h2>
+
+            <!-- Add Team Card -->
+            <div class="card mb-6 bg-[#1a1a1a] border-[#333]">
+                <h3 class="text-xs font-bold text-gray-400 uppercase mb-3" data-t="add_new_team">Añadir Nuevo Equipo</h3>
+                <form id="add-team-form" class="flex gap-2 items-start">
+                    <div class="flex-1">
+                        <input type="text" id="new-team-name" class="input-modern" placeholder="Nombre del Equipo" data-t="placeholder_team_name" required>
+                    </div>
+                    
+                    <div class="file-upload-btn w-12 h-11 bg-zinc-800 border border-zinc-700 rounded-lg flex items-center justify-center hover:border-orange-500 transition-colors shrink-0">
+                         <span class="text-xl">🛡️</span>
+                         <input type="file" id="new-team-logo" accept="image/*">
+                    </div>
+
+                    <button type="submit" class="bg-white text-black font-bold h-11 px-4 rounded-lg hover:bg-gray-200 active:scale-95 transition-transform" data-t="btn_add">
+                        Añadir
+                    </button>
+                </form>
+            </div>
+
+            <!-- List of Teams -->
+            <div id="teams-list" class="space-y-4">
+                <!-- Injected by JS -->
+            </div>
+            
+            <div class="h-12"></div>
+        </div>
+
+        <!-- VIEW: SETTINGS (Style Editor) -->
+        <div id="view-style" class="fade-in hidden w-full pb-8">
+            <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <span class="w-1 h-6 bg-blue-500 rounded-full block"></span>
+                Settings for Group <span id="style-group-title" class="text-blue-500">A</span>
+            </h2>
+            
+            <div class="space-y-6">
+                
+                <!-- NEW SECTION: Design Template -->
+                <div class="card">
+                    <h3 class="text-sm font-bold text-gray-300 uppercase mb-4 border-b border-gray-800 pb-2">Design Template</h3>
+                    <div id="template-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                         <!-- Injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Section: Language -->
+                <div class="card">
+                    <h3 class="text-sm font-bold text-gray-300 uppercase mb-4 border-b border-gray-800 pb-2" data-t="settings_language">Idioma / Language</h3>
+                    <div class="flex gap-2">
+                        <button onclick="setLanguage('es')" id="lang-es-btn" class="flex-1 py-2 rounded-lg border border-[#333] text-sm font-medium transition-all">Español</button>
+                        <button onclick="setLanguage('en')" id="lang-en-btn" class="flex-1 py-2 rounded-lg border border-[#333] text-sm font-medium transition-all">English</button>
+                    </div>
+                </div>
+
+                <!-- Section: Info -->
+                <div class="card">
+                    <h3 class="text-sm font-bold text-gray-300 uppercase mb-4 border-b border-gray-800 pb-2" data-t="settings_info">Información</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs text-gray-500 block mb-1" data-t="settings_tournament_name">Nombre del Torneo</label>
+                            <input type="text" id="tournamentName" class="input-modern" placeholder="CORE NEXUS">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-xs text-gray-500 block mb-1" data-t="settings_date">Fecha</label>
+                                <input type="text" id="tournamentDate" class="input-modern" placeholder="DD/MM/YYYY">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500 block mb-1" data-t="settings_time">Hora</label>
+                                <input type="text" id="tournamentTime" class="input-modern" placeholder="HH:MM">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 block mb-1" data-t="settings_price">Precio de Inscripción (Paypal)</label>
+                            <input type="text" id="registrationPrice" class="input-modern" placeholder="$5 USD">
+                            <p class="text-[10px] text-gray-500 mt-1" data-t="settings_price_hint">Visible solo en el Banner de Presentación</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Prizes (Presentation Only) -->
+                <div class="card">
+                    <h3 class="text-sm font-bold text-gray-300 uppercase mb-4 border-b border-gray-800 pb-2" data-t="settings_prizes">Premios (Solo Presentación)</h3>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="text-xs text-orange-400 block mb-1">Top 1</label>
+                            <input type="text" id="prize1" class="input-modern" placeholder="€100">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">Top 2</label>
+                            <input type="text" id="prize2" class="input-modern" placeholder="€50">
+                        </div>
+                        <div>
+                            <label class="text-xs text-orange-700 block mb-1">Top 3</label>
+                            <input type="text" id="prize3" class="input-modern" placeholder="€20">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Top Text -->
+                <div class="card">
+                    <h3 class="text-sm font-bold text-gray-300 uppercase mb-4 border-b border-gray-800 pb-2" data-t="settings_top_text">Texto Superior del Banner</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs text-gray-500 block mb-1" data-t="settings_left_text">Izquierda (Texto Pequeño)</label>
+                            <input type="text" id="footerTextLeft" class="input-modern" placeholder="FREE FIRE EUROPA">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 block mb-1" data-t="settings_right_text">Derecha (Texto Pequeño)</label>
+                            <input type="text" id="footerTextRight" class="input-modern" placeholder="CORE NEXUS">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Assets -->
+                <div class="card">
+                    <h3 class="text-sm font-bold text-gray-300 uppercase mb-4 border-b border-gray-800 pb-2" data-t="settings_assets">Recursos</h3>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <!-- Main Logo -->
+                        <div class="space-y-2">
+                            <label class="text-xs text-gray-500 block" data-t="settings_main_logo">Logo Principal</label>
+                            <div id="preview-logo-container" class="file-upload-btn w-full aspect-square bg-black border border-dashed border-gray-600 rounded-lg flex flex-col items-center justify-center hover:border-orange-500 transition-colors relative">
+                                <span class="text-2xl mb-1 z-0">🛡️</span>
+                                <span class="text-[10px] text-gray-400 z-0" data-t="settings_tap_upload">Toca para subir</span>
+                                <input type="file" id="logoImage" accept="image/*" class="z-20">
+                            </div>
+                            <button onclick="clearImage('logoImage')" class="w-full text-[10px] text-red-500 hover:underline" data-t="settings_remove_logo">Quitar Logo</button>
+                        </div>
+
+                        <!-- BG Image -->
+                        <div class="space-y-2">
+                            <label class="text-xs text-gray-500 block" data-t="settings_background">Fondo</label>
+                            <div id="preview-bg-container" class="file-upload-btn w-full aspect-square bg-black border border-dashed border-gray-600 rounded-lg flex flex-col items-center justify-center hover:border-orange-500 transition-colors relative">
+                                <span class="text-2xl mb-1 z-0">🖼️</span>
+                                <span class="text-[10px] text-gray-400 z-0" data-t="settings_tap_upload">Toca para subir</span>
+                                <input type="file" id="backgroundImage" accept="image/*" class="z-20">
+                            </div>
+                            <button onclick="clearImage('backgroundImage')" class="w-full text-[10px] text-red-500 hover:underline" data-t="settings_remove_bg">Quitar Fondo</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Sponsors -->
+                    <div class="pt-2 border-t border-gray-800 mt-2">
+                        <label class="text-xs text-gray-500 block mb-2" data-t="settings_sponsors_label">Patrocinadores del Pie y Banner</label>
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="file-upload-btn bg-zinc-800 text-white px-3 py-2 rounded text-xs font-medium flex items-center gap-2 border border-zinc-700">
+                                <span data-t="settings_add_sponsor">+ Añadir Sponsor</span>
+                                <input type="file" id="addSponsorInput" accept="image/*">
+                            </div>
+                        </div>
+                        <div id="sponsor-list" class="flex flex-wrap gap-2">
+                            <!-- Injected JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="pt-4">
+                    <button onclick="resetStyles()" class="w-full py-3 rounded-lg border border-red-900/50 text-red-500 text-sm font-medium hover:bg-red-900/10 transition-colors">
+                        <span data-t="settings_reset_group">Restablecer Ajustes del Grupo</span> <span id="reset-group-name">A</span>
+                    </button>
+                </div>
+                
+                <div class="pt-1">
+                    <button onclick="resetData()" class="w-full py-3 rounded-lg border border-red-900/50 text-red-500 text-sm font-medium hover:bg-red-900/10 transition-colors" data-t="settings_clear_data">
+                         Borrar Datos del Grupo
+                    </button>
+                </div>
+
+                <!-- Auth Section -->
+                <div class="pt-6 border-t border-gray-800 mt-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div id="user-avatar" class="w-10 h-10 rounded-full bg-zinc-800 overflow-hidden border border-zinc-700"></div>
+                        <div>
+                            <p id="user-name" class="text-sm font-bold text-white" data-t="user_guest">Usuario Invitado</p>
+                            <p id="user-email" class="text-[10px] text-gray-500" data-t="user_no_account">Sin cuenta vinculada</p>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="w-full py-3 rounded-lg bg-zinc-800 text-white text-sm font-bold hover:bg-zinc-700 transition-colors" data-t="settings_logout_btn">
+                        Cerrar Sesión / Cambiar Cuenta
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- VIEW: LEGAL -->
+        <div id="view-legal" class="fade-in hidden w-full pb-20">
+            <h2 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                <span class="w-1 h-6 bg-gray-500 rounded-full block"></span>
+                <span data-t="legal_title">Información Legal</span>
+            </h2>
+
+            <div class="space-y-6">
+                <!-- Terms and Conditions -->
+                <div class="card bg-[#1a1a1a] border-[#333]">
+                    <h3 class="text-sm font-bold text-orange-500 uppercase mb-3" data-t="legal_terms_title">Términos y Condiciones</h3>
+                    <div class="text-xs text-gray-400 leading-relaxed space-y-3 max-h-60 overflow-y-auto pr-2 no-scrollbar" data-t="legal_terms_content">
+                        <p>Bienvenido a <strong>CORE NEXUS FF</strong>. Al usar nuestra plataforma, aceptas los siguientes términos:</p>
+                        <p><strong>1. Uso del Servicio:</strong> Esta herramienta se proporciona para la gestión de torneos. Los usuarios son responsables de los datos que ingresan y las imágenes que generan.</p>
+                        <p><strong>2. Almacenamiento de Datos:</strong> Todos los datos se almacenan localmente en el almacenamiento de tu navegador (LocalStorage/IndexedDB). No recopilamos ni almacenamos tus datos en nuestros servidores.</p>
+                        <p><strong>3. Propiedad Intelectual:</strong> Los usuarios deben asegurarse de tener los derechos para usar cualquier logo o imagen subida a la plataforma.</p>
+                        <p><strong>4. Limitación de Responsabilidad:</strong> CORE NEXUS FF no es responsable de ninguna disputa que surja de los resultados del torneo o la pérdida de datos debido a la limpieza del navegador.</p>
+                    </div>
+                </div>
+
+                <!-- Cookies Policy -->
+                <div class="card bg-[#1a1a1a] border-[#333]">
+                    <h3 class="text-sm font-bold text-blue-500 uppercase mb-3" data-t="legal_cookies_title">Política de Cookies</h3>
+                    <div class="text-xs text-gray-400 leading-relaxed space-y-3" data-t="legal_cookies_content">
+                        <p>Esta plataforma utiliza tecnologías de almacenamiento local para funcionar correctamente:</p>
+                        <p><strong>LocalStorage e IndexedDB:</strong> Utilizamos estos para guardar los datos de tu torneo, listas de equipos y ajustes personalizados para que no los pierdas al cerrar el navegador.</p>
+                        <p><strong>Sin Rastreo:</strong> No utilizamos cookies de rastreo, cookies publicitarias ni análisis de terceros que te identifiquen.</p>
+                        <p>Al usar este sitio, aceptas el uso de estos métodos de almacenamiento local.</p>
+                    </div>
+                </div>
+
+                <div class="text-center pt-4">
+                    <p class="text-[10px] text-gray-600">© 2026 CORE NEXUS FF. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 w-full bg-[#1a1a1a]/95 backdrop-blur border-t border-[#333] z-50 pb-safe">
+        <div class="flex justify-around items-center h-16 max-w-lg mx-auto">
+            
+            <button onclick="setView('LEADERBOARD')" id="nav-leaderboard" class="nav-item flex flex-col items-center justify-center w-full h-full text-gray-500 active:text-orange-500 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z" />
+                </svg>
+                <span class="text-[10px] font-medium" data-t="nav_results">Results</span>
+            </button>
+
+            <button onclick="setView('REGISTER')" id="nav-editor" class="nav-item flex flex-col items-center justify-center w-full h-full text-gray-500 active:text-orange-500 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                <span class="text-[10px] font-medium" data-t="nav_data">Data Entry</span>
+            </button>
+
+            <button onclick="setView('STYLE')" id="nav-style" class="nav-item flex flex-col items-center justify-center w-full h-full text-gray-500 active:text-orange-500 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="text-[10px] font-medium" data-t="nav_settings">Settings</span>
+            </button>
+
+            <button onclick="setView('LEGAL')" id="nav-legal" class="nav-item flex flex-col items-center justify-center w-full h-full text-gray-500 active:text-orange-500 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span class="text-[10px] font-medium" data-t="nav_legal">Legal</span>
+            </button>
+            
+        </div>
+    </nav>
+    </div> <!-- End app-wrapper -->
+
+    <script>
+        // --- i18n Logic ---
+        const translations = {
+            es: {
+                landing_desc: "El motor de gestión de torneos definitivo para organizadores de Free Fire. Tablas profesionales, puntuación automática y exportaciones instantáneas.",
+                landing_enter: "ENTRAR A LA APP",
+                landing_access_local: "Acceso Local • Sin Registro",
+                landing_back_panel: "VOLVER AL PANEL",
+                landing_logout: "Cerrar Sesión",
+                feat_results_title: "Resultados Al Instante",
+                feat_results_desc: "Cálculo automático de puntos basado en reglas oficiales de posición y eliminaciones.",
+                feat_graphics_title: "Gráficos Pro",
+                feat_graphics_desc: "Genera tablas en alta resolución PNG para resultados, top 3 y patrocinadores.",
+                feat_themes_title: "Multi-Tema",
+                feat_themes_desc: "Elige entre más de 14 temas personalizados para que coincidan con la vibra de tu torneo.",
+                footer_built_for: "Creado para la comunidad competitiva • v7.3",
+                nav_results: "Resultados",
+                nav_data: "Registro",
+                nav_settings: "Ajustes",
+                nav_legal: "Legal",
+                header_manager: "GESTOR",
+                view_results_title: "Tabla de Resultados",
+                view_top3_title: "Banner Top 3",
+                view_confirmed_title: "Equipos Confirmados",
+                view_presentation_title: "Presentación",
+                view_partners_title: "Socios Oficiales",
+                btn_save_board: "GUARDAR TABLA",
+                btn_save_top3: "GUARDAR TOP 3",
+                btn_save_teams: "GUARDAR EQUIPOS",
+                btn_save_info: "GUARDAR INFO",
+                btn_save_sponsors: "GUARDAR SPONSORS",
+                edit_group_title: "Editar Grupo",
+                add_new_team: "Añadir Nuevo Equipo",
+                placeholder_team_name: "Nombre del Equipo",
+                btn_add: "Añadir",
+                settings_title: "Ajustes del Grupo",
+                settings_design: "Plantilla de Diseño",
+                settings_info: "Información",
+                settings_tournament_name: "Nombre del Torneo",
+                settings_date: "Fecha",
+                settings_time: "Hora",
+                settings_price: "Precio de Inscripción (Paypal)",
+                settings_price_hint: "Visible solo en el Banner de Presentación",
+                settings_prizes: "Premios (Solo Presentación)",
+                settings_top_text: "Texto Superior del Banner",
+                settings_left_text: "Izquierda (Texto Pequeño)",
+                settings_right_text: "Derecha (Texto Pequeño)",
+                settings_assets: "Recursos",
+                settings_main_logo: "Logo Principal",
+                settings_background: "Fondo",
+                settings_tap_upload: "Toca para subir",
+                settings_remove_logo: "Quitar Logo",
+                settings_remove_bg: "Quitar Fondo",
+                settings_sponsors_label: "Patrocinadores del Pie y Banner",
+                settings_add_sponsor: "+ Añadir Sponsor",
+                settings_reset_group: "Restablecer Ajustes del Grupo",
+                settings_clear_data: "Borrar Datos del Grupo",
+                settings_logout_btn: "Cerrar Sesión / Cambiar Cuenta",
+                settings_language: "Idioma / Language",
+                legal_title: "Información Legal",
+                legal_terms_title: "Términos y Condiciones",
+                legal_cookies_title: "Política de Cookies",
+                legal_terms_content: "Bienvenido a <strong>CORE NEXUS FF</strong>. Al usar nuestra plataforma, aceptas los siguientes términos:<br><br><strong>1. Uso del Servicio:</strong> Esta herramienta se proporciona para la gestión de torneos. Los usuarios son responsables de los datos que ingresan y las imágenes que generan.<br><br><strong>2. Almacenamiento de Datos:</strong> Todos los datos se almacenan localmente en el almacenamiento de tu navegador (LocalStorage/IndexedDB). No recopilamos ni almacenamos tus datos en nuestros servidores.<br><br><strong>3. Propiedad Intelectual:</strong> Los usuarios deben asegurarse de tener los derechos para usar cualquier logo o imagen subida a la plataforma.<br><br><strong>4. Limitación de Responsabilidad:</strong> CORE NEXUS FF no es responsable de ninguna disputa que surja de los resultados del torneo o la pérdida de datos debido a la limpieza del navegador.",
+                legal_cookies_content: "<strong>LocalStorage e IndexedDB:</strong> Utilizamos estos para guardar los datos de tu torneo, listas de equipos y ajustes personalizados para que no los pierdas al cerrar el navegador.<br><br><strong>Sin Rastreo:</strong> No utilizamos cookies de rastreo, cookies publicitarias ni análisis de terceros que te identifiquen.<br><br>Al usar este sitio, aceptas el uso de estos métodos de almacenamiento local.",
+                user_guest: "Usuario Invitado",
+                user_no_account: "Sin cuenta vinculada",
+                confirm_reset_styles: "¿Estás seguro de que quieres restablecer los estilos de este grupo?",
+                confirm_reset_data: "¿Estás seguro de que quieres borrar TODOS los equipos y datos de este grupo?",
+                confirm_delete_team: "¿Eliminar este equipo?",
+                msg_team_added: "Equipo añadido correctamente",
+                msg_saved: "¡Guardado!",
+                how_it_works_title: "Cómo Funciona",
+                how_it_works_step1_title: "1. Configura tu Torneo",
+                how_it_works_step1_desc: "Define el nombre, fecha, premios y elige uno de nuestros temas profesionales.",
+                how_it_works_step2_title: "2. Registra los Equipos",
+                how_it_works_step2_desc: "Añade los equipos participantes y registra sus eliminaciones y posición en cada partida.",
+                how_it_works_step3_title: "3. Genera y Comparte",
+                how_it_works_step3_desc: "La app calcula los puntos automáticamente. Exporta tablas en PNG de alta calidad al instante.",
+            },
+            en: {
+                landing_desc: "The ultimate tournament management engine for Free Fire organizers. Professional boards, automated scoring, and instant exports.",
+                landing_enter: "ENTER THE APP",
+                landing_access_local: "Local Access • No Registration",
+                landing_back_panel: "BACK TO PANEL",
+                landing_logout: "Logout",
+                feat_results_title: "Instant Results",
+                feat_results_desc: "Automated points calculation based on official placement and kill rules.",
+                feat_graphics_title: "Pro Graphics",
+                feat_graphics_desc: "Generate high-resolution PNG boards for results, top 3, and sponsors.",
+                feat_themes_title: "Multi-Theme",
+                feat_themes_desc: "Choose from 14+ custom themes to match your tournament's unique vibe.",
+                footer_built_for: "Built for the competitive community • v7.3",
+                nav_results: "Results",
+                nav_data: "Data Entry",
+                nav_settings: "Settings",
+                nav_legal: "Legal",
+                header_manager: "MANAGER",
+                view_results_title: "Results Board",
+                view_top3_title: "Top 3 Banner",
+                view_confirmed_title: "Confirmed Teams",
+                view_presentation_title: "Presentation",
+                view_partners_title: "Official Partners",
+                btn_save_board: "SAVE BOARD",
+                btn_save_top3: "SAVE TOP 3",
+                btn_save_teams: "SAVE TEAMS",
+                btn_save_info: "SAVE INFO",
+                btn_save_sponsors: "SAVE SPONSORS",
+                edit_group_title: "Edit Group",
+                add_new_team: "Add New Team",
+                placeholder_team_name: "Team Name",
+                btn_add: "Add",
+                settings_title: "Settings for Group",
+                settings_design: "Design Template",
+                settings_info: "Information",
+                settings_tournament_name: "Tournament Name",
+                settings_date: "Date",
+                settings_time: "Time",
+                settings_price: "Registration Price (Paypal)",
+                settings_price_hint: "Visible only in Presentation Banner",
+                settings_prizes: "Prizes (Presentation Only)",
+                settings_top_text: "Top Banner Text",
+                settings_left_text: "Left (Small Text)",
+                settings_right_text: "Right (Small Text)",
+                settings_assets: "Assets",
+                settings_main_logo: "Main Logo",
+                settings_background: "Background",
+                settings_tap_upload: "Tap to upload",
+                settings_remove_logo: "Remove Logo",
+                settings_remove_bg: "Remove BG",
+                settings_sponsors_label: "Footer & Banner Sponsors",
+                settings_add_sponsor: "+ Add Sponsor",
+                settings_reset_group: "Reset Settings for Group",
+                settings_clear_data: "Clear Group Data",
+                settings_logout_btn: "Logout / Change Account",
+                settings_language: "Language / Idioma",
+                legal_title: "Legal Information",
+                legal_terms_title: "Terms and Conditions",
+                legal_cookies_title: "Cookies Policy",
+                legal_terms_content: "Welcome to <strong>CORE NEXUS FF</strong>. By using our platform, you agree to the following terms:<br><br><strong>1. Service Use:</strong> This tool is provided for tournament management. Users are responsible for the data they enter and the images they generate.<br><br><strong>2. Data Storage:</strong> All data is stored locally in your browser's storage (LocalStorage/IndexedDB). We do not collect or store your data on our servers.<br><br><strong>3. Intellectual Property:</strong> Users must ensure they have the rights to use any logo or image uploaded to the platform.<br><br><strong>4. Limitation of Liability:</strong> CORE NEXUS FF is not responsible for any disputes arising from tournament results or data loss due to browser cleaning.",
+                legal_cookies_content: "<strong>LocalStorage and IndexedDB:</strong> We use these to save your tournament data, team lists, and custom settings so you don't lose them when you close the browser.<br><br><strong>No Tracking:</strong> We do not use tracking cookies, advertising cookies, or third-party analytics that identify you.<br><br>By using this site, you accept the use of these local storage methods.",
+                user_guest: "Guest User",
+                user_no_account: "No account linked",
+                confirm_reset_styles: "Are you sure you want to reset the styles for this group?",
+                confirm_reset_data: "Are you sure you want to clear ALL teams and data for this group?",
+                confirm_delete_team: "Delete this team?",
+                msg_team_added: "Team added successfully",
+                msg_saved: "Saved!",
+                how_it_works_title: "How It Works",
+                how_it_works_step1_title: "1. Setup Your Tournament",
+                how_it_works_step1_desc: "Define the name, date, prizes and choose one of our professional themes.",
+                how_it_works_step2_title: "2. Register Teams",
+                how_it_works_step2_desc: "Add participating teams and record their kills and placement in each match.",
+                how_it_works_step3_title: "3. Generate and Share",
+                how_it_works_step3_desc: "The app calculates points automatically. Export high-quality PNG boards instantly.",
+            }
+        };
+
+        let currentLang = localStorage.getItem('core_nexus_lang') || 'es';
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('core_nexus_lang', lang);
+            applyLanguage();
+        }
+
+        function applyLanguage() {
+            const t = translations[currentLang];
+            
+            // Update all elements with data-t attribute
+            document.querySelectorAll('[data-t]').forEach(el => {
+                const key = el.getAttribute('data-t');
+                if (t[key]) {
+                    if (el.tagName === 'INPUT' && el.placeholder) {
+                        el.placeholder = t[key];
+                    } else if (key.includes('content')) {
+                        // Use innerHTML for content blocks that might have HTML tags
+                        el.innerHTML = t[key];
+                    } else {
+                        el.innerText = t[key];
+                    }
+                }
+            });
+
+            // Update specific dynamic titles
+            const regGroupTitle = document.getElementById('reg-group-title');
+            if (regGroupTitle) {
+                const parent = regGroupTitle.parentElement;
+                parent.childNodes[0].textContent = t.edit_group_title + ' ';
+            }
+
+            const styleGroupTitle = document.getElementById('style-group-title');
+            if (styleGroupTitle) {
+                const parent = styleGroupTitle.parentElement;
+                parent.childNodes[0].textContent = t.settings_title + ' ';
+            }
+
+            const resetGroupName = document.getElementById('reset-group-name');
+            if (resetGroupName) {
+                const parent = resetGroupName.parentElement;
+                parent.childNodes[0].textContent = t.settings_reset_group + ' ';
+            }
+
+            // Update language buttons active state
+            document.getElementById('lang-es-btn').className = `flex-1 py-2 rounded-lg border text-sm font-medium transition-all ${currentLang === 'es' ? 'border-orange-500 bg-orange-500/10 text-orange-500' : 'border-[#333] text-gray-400'}`;
+            document.getElementById('lang-en-btn').className = `flex-1 py-2 rounded-lg border text-sm font-medium transition-all ${currentLang === 'en' ? 'border-orange-500 bg-orange-500/10 text-orange-500' : 'border-[#333] text-gray-400'}`;
+            
+            // Re-render components that might need translation
+            if (typeof renderTeams === 'function') renderTeams();
+        }
+
+        // --- Auth Logic ---
+        function guestLogin() {
+            localStorage.setItem('core_nexus_user', JSON.stringify({
+                name: 'Administrador',
+                email: 'Acceso Local',
+                picture: null,
+                type: 'guest'
+            }));
+            checkAuth();
+        }
+
+        function logout() {
+            localStorage.removeItem('core_nexus_user');
+            window.location.reload();
+        }
+
+        function goHome() {
+            const landing = document.getElementById('landing-wrapper');
+            const app = document.getElementById('app-wrapper');
+
+            landing.classList.remove('hidden');
+            app.classList.add('hidden');
+            syncLandingAuth();
+        }
+
+        function syncLandingAuth() {
+            const userStr = localStorage.getItem('core_nexus_user');
+            const loginSection = document.getElementById('auth-login-section');
+            const loggedSection = document.getElementById('auth-logged-section');
+            
+            if (!loginSection || !loggedSection) return;
+
+            if (userStr) {
+                loginSection.classList.add('hidden');
+                loggedSection.classList.remove('hidden');
+            } else {
+                loginSection.classList.remove('hidden');
+                loggedSection.classList.add('hidden');
+            }
+        }
+
+        function checkAuth() {
+            const userStr = localStorage.getItem('core_nexus_user');
+            const landing = document.getElementById('landing-wrapper');
+            const app = document.getElementById('app-wrapper');
+            
+            syncLandingAuth();
+
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                landing.classList.add('hidden');
+                app.classList.remove('hidden');
+                
+                // Update Settings Profile
+                document.getElementById('user-name').textContent = user.name;
+                document.getElementById('user-email').textContent = user.email;
+                const avatar = document.getElementById('user-avatar');
+                if (user.picture) {
+                    avatar.innerHTML = `<img src="${user.picture}" class="w-full h-full object-cover" referrerPolicy="no-referrer">`;
+                } else {
+                    avatar.innerHTML = `<div class="w-full h-full flex items-center justify-center text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>`;
+                }
+            } else {
+                landing.classList.remove('hidden');
+                app.classList.add('hidden');
+            }
+        }
+
+        // --- State ---
+        const GROUPS = ['A', 'B', 'C', 'D', 'E', 'F', 'ESPECIAL', 'FINALS', '3 SALAS'];
+        let activeGroup = 'A';
+        let currentView = 'LEADERBOARD'; 
+        
+        // Data Structure
+        let data = { A: [], B: [], C: [], D: [], E: [], F: [], ESPECIAL: [], FINALS: [], '3 SALAS': [] };
+        
+        const DEFAULT_STYLE_TEMPLATE = {
+            template: 'standard', // 'standard', 'cyber', 'minimal'
+            tournamentName: 'CORE NEXUS',
+            tournamentDate: '24/11/2025',
+            tournamentTime: '20:00 HRS',
+            registrationPrice: '', // New Field
+            footerTextLeft: 'EUROPA FREE FIRE',
+            footerTextCenter: '',
+            footerTextRight: 'CORE NEXUS SERIES',
+            prize1: '',
+            prize2: '',
+            prize3: '',
+            logoImage: null, 
+            backgroundImage: null, 
+            sponsorLogos: [],
+        };
+        
+        // Styles map: styles[groupName] = styleObject
+        let styles = {};
+        // Initialize defaults
+        GROUPS.forEach(g => {
+            styles[g] = JSON.parse(JSON.stringify(DEFAULT_STYLE_TEMPLATE));
+        });
+
+        // --- Persistence (IndexedDB + LocalStorage Hybrid) ---
+        
+        // IndexedDB Configuration
+        const DB_NAME = 'XT_UND_DB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'app_data';
+
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME);
+                    }
+                };
+                request.onsuccess = (e) => resolve(e.target.result);
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async function dbSet(key, value) {
+            try {
+                const db = await openDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction(STORE_NAME, 'readwrite');
+                    const store = tx.objectStore(STORE_NAME);
+                    const request = store.put(value, key);
+                    request.onsuccess = () => resolve();
+                    request.onerror = (e) => reject(e.target.error);
+                });
+            } catch (e) {
+                console.error("DB Save Error:", e);
+            }
+        }
+
+        async function dbGet(key) {
+            try {
+                const db = await openDB();
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction(STORE_NAME, 'readonly');
+                    const store = tx.objectStore(STORE_NAME);
+                    const request = store.get(key);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = (e) => reject(e.target.error);
+                });
+            } catch (e) {
+                console.error("DB Load Error:", e);
+                return null;
+            }
+        }
+
+        async function loadData() {
+            try {
+                // 1. Try IndexedDB first
+                let storedData = await dbGet('xt_und_data_v2');
+                let storedStyles = await dbGet('xt_und_styles_v3');
+
+                // 2. Migration: Check LocalStorage if IDB is empty
+                if (!storedData) {
+                    const lsData = localStorage.getItem('xt_und_data_v2');
+                    if (lsData) {
+                        console.log("Migrating Data to IndexedDB...");
+                        storedData = JSON.parse(lsData);
+                        await dbSet('xt_und_data_v2', storedData);
+                    }
+                }
+                
+                if (!storedStyles) {
+                    const lsStyles = localStorage.getItem('xt_und_styles_v3');
+                    if (lsStyles) {
+                        console.log("Migrating Styles to IndexedDB...");
+                        storedStyles = JSON.parse(lsStyles);
+                        await dbSet('xt_und_styles_v3', storedStyles);
+                    }
+                }
+
+                // 3. Apply Data
+                if (storedData) {
+                    data = storedData;
+                    if(!data.ESPECIAL) data.ESPECIAL = [];
+                    if(!data['3 SALAS']) data['3 SALAS'] = [];
+                }
+
+                applyLanguage();
+
+                if (storedStyles) {
+                    // Check for migration from V1 (Global Style) to V2 (Group Styles)
+                    // Old format: { tournamentName: '...' }
+                    // New format: { 'A': { tournamentName: ... }, 'B': ... }
+                    
+                    if (storedStyles.tournamentName) {
+                        console.log("Migrating Styles from Global to Per-Group...");
+                        // Propagate global style to all groups
+                        GROUPS.forEach(g => {
+                            styles[g] = { ...DEFAULT_STYLE_TEMPLATE, ...storedStyles };
+                            // Fix legacy sponsor array issue during migration
+                            if (styles[g].sponsorLogo && (!styles[g].sponsorLogos || styles[g].sponsorLogos.length === 0)) {
+                                styles[g].sponsorLogos = [styles[g].sponsorLogo];
+                            }
+                        });
+                        saveStyles(); // Save the new structure immediately
+                    } else {
+                        // New format - load directly
+                        styles = storedStyles;
+                        // Ensure all groups exist in styles and have new props (like template)
+                        GROUPS.forEach(g => {
+                            if (!styles[g]) styles[g] = JSON.parse(JSON.stringify(DEFAULT_STYLE_TEMPLATE));
+                            // Ensure template property exists
+                            if(!styles[g].template) styles[g].template = 'standard';
+                        });
+                    }
+                }
+
+                // Active group is small, keep using LS or default
+                const storedGroup = localStorage.getItem('xt_und_active_group');
+                if (storedGroup && GROUPS.includes(storedGroup)) activeGroup = storedGroup;
+
+            } catch (e) {
+                console.error("Error loading data", e);
+                alert("Error loading data from storage. Please check console.");
+            }
+        }
+
+        async function saveData() {
+            try {
+                await dbSet('xt_und_data_v2', data);
+                localStorage.setItem('xt_und_active_group', activeGroup);
+            } catch (e) { console.error("Save Data Error:", e); }
+        }
+
+        async function saveStyles() {
+            try {
+                await dbSet('xt_und_styles_v3', styles);
+            } catch (e) { console.error("Save Styles Error:", e); }
+        }
+
+        // --- Logic ---
+        function calculateMatchPoints(pos, kills) {
+            if(!pos) return 0;
+            let pts = 0;
+            const p = parseInt(pos);
+            const k = parseInt(kills) || 0;
+            if (p === 1) pts = 12;
+            else if (p === 2) pts = 9;
+            else if (p === 3) pts = 8;
+            else if (p === 4) pts = 7;
+            else if (p === 5) pts = 6;
+            else if (p === 6) pts = 5;
+            else if (p === 7) pts = 4;
+            else if (p === 8) pts = 3;
+            else if (p === 9) pts = 2;
+            else if (p === 10) pts = 1;
+            return pts + k;
+        }
+
+        function getAggregatedData(group) {
+            const teams = data[group] || [];
+            const processed = teams.map(t => {
+                let totalPoints = 0;
+                let totalKills = 0;
+                let booyahs = 0;
+                t.matches.forEach(m => {
+                    const k = parseInt(m.k) || 0;
+                    const p = parseInt(m.p);
+                    if(p === 1) booyahs++;
+                    totalKills += k;
+                    totalPoints += calculateMatchPoints(m.p, m.k);
+                });
+                return { ...t, points: totalPoints, kills: totalKills, booyah: booyahs };
+            });
+            return processed.sort((a, b) => {
+                if(b.points !== a.points) return b.points - a.points;
+                return b.kills - a.kills;
+            });
+        }
+
+        // --- Navigation ---
+        function setView(view) {
+            currentView = view;
+            document.getElementById('view-leaderboard').classList.add('hidden');
+            document.getElementById('view-register').classList.add('hidden');
+            document.getElementById('view-style').classList.add('hidden');
+            document.getElementById('view-legal').classList.add('hidden');
+            document.getElementById('view-leaderboard').classList.remove('flex');
+
+            if (view === 'LEADERBOARD') {
+                document.getElementById('view-leaderboard').classList.remove('hidden');
+                document.getElementById('view-leaderboard').classList.add('flex');
+                renderAll();
+            } else if (view === 'REGISTER') {
+                document.getElementById('view-register').classList.remove('hidden');
+                renderTeamEditor();
+            } else if (view === 'STYLE') {
+                document.getElementById('view-style').classList.remove('hidden');
+                
+                // Update Style Inputs for current group
+                const s = styles[activeGroup];
+                document.getElementById('style-group-title').textContent = activeGroup;
+                document.getElementById('reset-group-name').textContent = activeGroup;
+                
+                document.getElementById('tournamentName').value = s.tournamentName || '';
+                document.getElementById('tournamentDate').value = s.tournamentDate || '';
+                document.getElementById('tournamentTime').value = s.tournamentTime || '';
+                document.getElementById('registrationPrice').value = s.registrationPrice || ''; // New
+                document.getElementById('footerTextLeft').value = s.footerTextLeft || '';
+                document.getElementById('footerTextRight').value = s.footerTextRight || '';
+                
+                // Update Prizes
+                document.getElementById('prize1').value = s.prize1 || '';
+                document.getElementById('prize2').value = s.prize2 || '';
+                document.getElementById('prize3').value = s.prize3 || '';
+                
+                // Update Template Selector
+                updateTemplateSelectionUI();
+
+                // Update Image Previews in Settings
+                updateImagePreview('preview-logo-container', s.logoImage, '🛡️');
+                updateImagePreview('preview-bg-container', s.backgroundImage, '🖼️');
+                
+                renderSponsorListInSettings();
+            } else if (view === 'LEGAL') {
+                document.getElementById('view-legal').classList.remove('hidden');
+            }
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('text-orange-500'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.add('text-gray-500'));
+            if(view === 'LEADERBOARD') document.getElementById('nav-leaderboard').classList.add('text-orange-500');
+            if(view === 'REGISTER') document.getElementById('nav-editor').classList.add('text-orange-500');
+            if(view === 'STYLE') document.getElementById('nav-style').classList.add('text-orange-500');
+            if(view === 'LEGAL') document.getElementById('nav-legal').classList.add('text-orange-500');
+        }
+
+        function setTemplate(tmplName) {
+            styles[activeGroup].template = tmplName;
+            saveStyles();
+            updateTemplateSelectionUI();
+            renderAll(); // Pre-render canvas so results are ready if user switches tab
+        }
+
+        function updateTemplateSelectionUI() {
+            const current = styles[activeGroup].template || 'standard';
+            document.querySelectorAll('.template-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.getElementById('btn-tmpl-' + current);
+            if(activeBtn) activeBtn.classList.add('active');
+        }
+        
+        function updateImagePreview(containerId, imageSrc, icon) {
+             const container = document.getElementById(containerId);
+             const input = container.querySelector('input');
+             container.innerHTML = '';
+             if (imageSrc) {
+                const img = document.createElement('img');
+                img.src = imageSrc;
+                img.className = 'absolute inset-0 w-full h-full object-cover z-10 rounded-lg opacity-50 hover:opacity-100 transition-opacity';
+                container.appendChild(img);
+             } else {
+                 container.innerHTML = `<span class="text-2xl mb-1 z-0">${icon}</span><span class="text-[10px] text-gray-400 z-0">Tap to upload</span>`;
+             }
+             container.appendChild(input);
+        }
+        
+        // --- Render Helpers ---
+        function renderGroupButtons() {
+            const container = document.getElementById('group-selector');
+            container.innerHTML = '';
+            
+            GROUPS.forEach(g => {
+                const btn = document.createElement('button');
+                const isActive = g === activeGroup;
+                btn.className = `whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                    isActive 
+                    ? 'bg-orange-600 text-white shadow-lg shadow-orange-900/40' 
+                    : 'bg-zinc-800 text-gray-400 hover:bg-zinc-700 hover:text-white'
+                }`;
+                btn.textContent = (g === 'ESPECIAL' || g === 'FINALS') ? g : (g.length > 2 ? g : `GROUP ${g}`);
+                btn.onclick = () => {
+                    activeGroup = g;
+                    saveData();
+                    renderGroupButtons();
+                    
+                    // Logic to refresh view content based on current view
+                    if(currentView === 'REGISTER') renderTeamEditor(); 
+                    if(currentView === 'STYLE') setView('STYLE'); // Refreshes inputs
+                    if(currentView === 'LEADERBOARD') renderAll();
+                };
+                container.appendChild(btn);
+            });
+        }
+        
+        function renderTeamEditor() {
+            const container = document.getElementById('teams-list');
+            const title = document.getElementById('reg-group-title');
+            if(title) title.textContent = activeGroup;
+            
+            container.innerHTML = '';
+            const teams = data[activeGroup] || [];
+
+            teams.forEach(team => {
+                const div = document.createElement('div');
+                div.className = 'card bg-[#1e1e1e] border border-[#333] p-3 rounded-lg animate-fade-in mb-3';
+                
+                // Header: Logo, Name, Delete
+                let logoHtml = `<div class="w-10 h-10 bg-black rounded flex items-center justify-center border border-gray-700 text-xs text-gray-500 overflow-hidden relative group cursor-pointer">
+                    ${team.logo ? `<img src="${team.logo}" class="w-full h-full object-cover">` : '🛡️'}
+                    <input type="file" onchange="updateTeamLogo('${team.id}', this)" class="absolute inset-0 opacity-0 cursor-pointer">
+                </div>`;
+
+                let matchesHtml = '';
+                for(let i=0; i<5; i++) {
+                     const m = team.matches[i] || {p:'', k:''};
+                     matchesHtml += `
+                        <div class="bg-black/50 p-1 rounded border border-gray-800 flex flex-col gap-1 w-[45px]">
+                            <span class="text-[8px] text-gray-500 text-center">M${i+1}</span>
+                            <input type="number" value="${m.p}" onchange="updateMatch('${team.id}', ${i}, 'p', this.value)" class="input-compact text-orange-400 font-bold border-orange-900/30" placeholder="P">
+                            <input type="number" value="${m.k}" onchange="updateMatch('${team.id}', ${i}, 'k', this.value)" class="input-compact bg-zinc-900" placeholder="K">
+                        </div>
+                     `;
+                }
+
+                div.innerHTML = `
+                    <div class="flex items-center gap-3 mb-3">
+                        ${logoHtml}
+                        <input type="text" value="${team.name}" onchange="updateTeamName('${team.id}', this.value)" class="input-modern flex-1" placeholder="Team Name">
+                        <button onclick="deleteTeam('${team.id}')" class="text-red-500 text-xs hover:bg-red-900/20 p-2 rounded">Delete</button>
+                    </div>
+                    <div class="flex gap-1 overflow-x-auto pb-1 no-scrollbar">
+                        ${matchesHtml}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // --- Actions ---
+        function updateMatch(id, index, type, value) {
+            const teams = data[activeGroup];
+            const team = teams.find(t => t.id === id);
+            if(team) {
+                if(!team.matches[index]) team.matches[index] = {p:'', k:''};
+                team.matches[index][type] = value;
+                saveData();
+            }
+        }
+
+        function updateTeamName(id, value) {
+            const team = data[activeGroup].find(t => t.id === id);
+            if(team) { team.name = value; saveData(); }
+        }
+
+        function updateTeamLogo(id, input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const team = data[activeGroup].find(t => t.id === id);
+                    if(team) { team.logo = e.target.result; saveData(); renderTeamEditor(); }
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function deleteTeam(id) {
+            if(confirm('Delete this team?')) {
+                data[activeGroup] = data[activeGroup].filter(t => t.id !== id);
+                saveData();
+                renderTeamEditor();
+            }
+        }
+
+        function resetStyles() {
+            if(confirm(`Reset all styles for Group ${activeGroup}?`)) { 
+                styles[activeGroup] = JSON.parse(JSON.stringify(DEFAULT_STYLE_TEMPLATE)); 
+                saveStyles(); 
+                setView('STYLE'); 
+                renderAll(); 
+            }
+        }
+
+        function resetData() {
+            if(confirm(`Clear all data for Group ${activeGroup}?`)) { data[activeGroup] = []; saveData(); renderTeamEditor(); renderAll(); }
+        }
+
+        function clearImage(key) {
+            styles[activeGroup][key] = null;
+            saveStyles();
+            setView('STYLE'); // refresh previews
+            renderAll();
+        }
+
+        function handleImageUpload(e, key) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    styles[activeGroup][key] = evt.target.result;
+                    saveStyles();
+                    setView('STYLE'); // refresh previews
+                    renderAll();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function renderSponsorListInSettings() {
+            const container = document.getElementById('sponsor-list');
+            container.innerHTML = '';
+            const s = styles[activeGroup];
+            (s.sponsorLogos || []).forEach((logo, idx) => {
+                const div = document.createElement('div');
+                div.className = 'relative w-10 h-10 border border-zinc-700 rounded bg-black flex items-center justify-center';
+                div.innerHTML = `<img src="${logo}" class="max-w-full max-h-full object-contain"><button onclick="removeSponsor(${idx})" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-3 h-3 flex items-center justify-center text-[8px]">&times;</button>`;
+                container.appendChild(div);
+            });
+        }
+
+        function removeSponsor(idx) {
+            styles[activeGroup].sponsorLogos.splice(idx, 1);
+            saveStyles();
+            renderSponsorListInSettings();
+            renderAll();
+        }
+        
+        // ==========================================
+        // CANVAS RENDERING ENGINE (Multi-Theme)
+        // ==========================================
+
+        const CANVAS_WIDTH = 550;
+        // Fonts
+        const FONT_GAMER = "900 italic 32px Orbitron, sans-serif";
+        const FONT_GAMER_SM = "700 italic 24px Orbitron, sans-serif";
+        const FONT_SUBTITLE = "700 12px Orbitron, sans-serif";
+        const FONT_NORMAL = "400 12px Inter, sans-serif";
+        const FONT_BOLD = "700 12px Inter, sans-serif";
+
+        // Palettes
+        const PALETTES = {
+            standard: {
+                bg: "#000000",
+                text: "#ffffff",
+                textDim: "#a1a1aa",
+                accent: "#ea580c", // Orange
+                headerTitle: "#ffffff",
+                headerSubtitle: "#fbbf24", // Gold
+                rank1: "#f97316",
+                rank2: "#94a3b8",
+                rank3: "#c2410c",
+                pillBg: "rgba(24, 24, 27, 0.8)",
+                pillBorder: "#3f3f46",
+                footerText: "rgba(255,255,255,0.3)",
+                isDark: true
+            },
+            cyber: {
+                bg: "#0f0518", // Deep purple/black
+                text: "#ffffff",
+                textDim: "#e9d5ff",
+                accent: "#d946ef", // Fuchsia
+                headerTitle: "#f0abfc",
+                headerSubtitle: "#a855f7",
+                rank1: "#d946ef",
+                rank2: "#a78bfa",
+                rank3: "#86198f",
+                pillBg: "rgba(49, 14, 75, 0.8)",
+                pillBorder: "#701a75",
+                footerText: "rgba(216, 180, 254, 0.3)",
+                isDark: true
+            },
+            minimal: {
+                bg: "#f8fafc", // Slate 50
+                text: "#0f172a", // Slate 900
+                textDim: "#64748b", // Slate 500
+                accent: "#2563eb", // Blue
+                headerTitle: "#1e293b",
+                headerSubtitle: "#3b82f6",
+                rank1: "#3b82f6",
+                rank2: "#94a3b8",
+                rank3: "#60a5fa",
+                pillBg: "#ffffff",
+                pillBorder: "#cbd5e1",
+                footerText: "#94a3b8",
+                isDark: false
+            },
+            // NEW PALETTES
+            toxic: {
+                bg: "#050505", text: "#ecfccb", textDim: "#4ade80", accent: "#a3e635",
+                headerTitle: "#d9f99d", headerSubtitle: "#bef264",
+                rank1: "#a3e635", rank2: "#86efac", rank3: "#4ade80",
+                pillBg: "rgba(20, 83, 45, 0.8)", pillBorder: "#3f6212", footerText: "rgba(163, 230, 53, 0.3)", isDark: true
+            },
+            inferno: {
+                bg: "#0f0000", text: "#fff1f2", textDim: "#fda4af", accent: "#f43f5e",
+                headerTitle: "#ffe4e6", headerSubtitle: "#fb7185",
+                rank1: "#e11d48", rank2: "#f43f5e", rank3: "#fb7185",
+                pillBg: "rgba(136, 19, 55, 0.8)", pillBorder: "#9f1239", footerText: "rgba(251, 113, 133, 0.3)", isDark: true
+            },
+            oceanic: {
+                bg: "#082f49", text: "#f0f9ff", textDim: "#bae6fd", accent: "#38bdf8",
+                headerTitle: "#e0f2fe", headerSubtitle: "#7dd3fc",
+                rank1: "#0ea5e9", rank2: "#38bdf8", rank3: "#7dd3fc",
+                pillBg: "rgba(12, 74, 110, 0.8)", pillBorder: "#075985", footerText: "rgba(56, 189, 248, 0.3)", isDark: true
+            },
+            royal: {
+                bg: "#2e1065", text: "#faf5ff", textDim: "#e9d5ff", accent: "#fbbf24",
+                headerTitle: "#f3e8ff", headerSubtitle: "#d8b4fe",
+                rank1: "#fbbf24", rank2: "#c084fc", rank3: "#a855f7",
+                pillBg: "rgba(88, 28, 135, 0.8)", pillBorder: "#6b21a8", footerText: "rgba(251, 191, 36, 0.3)", isDark: true
+            },
+            sunset: {
+                bg: "#2a0a18", text: "#fff1f2", textDim: "#fecdd3", accent: "#f472b6",
+                headerTitle: "#fbcfe8", headerSubtitle: "#fb7185",
+                rank1: "#f472b6", rank2: "#fb7185", rank3: "#fda4af",
+                pillBg: "rgba(131, 24, 67, 0.8)", pillBorder: "#9d174d", footerText: "rgba(244, 114, 182, 0.3)", isDark: true
+            },
+            tactical: {
+                bg: "#1c1917", text: "#e7e5e4", textDim: "#a8a29e", accent: "#84cc16",
+                headerTitle: "#d6d3d1", headerSubtitle: "#a3e635",
+                rank1: "#65a30d", rank2: "#a8a29e", rank3: "#78716c",
+                pillBg: "rgba(41, 37, 36, 0.9)", pillBorder: "#57534e", footerText: "rgba(168, 162, 158, 0.3)", isDark: true
+            },
+            retro: {
+                bg: "#11001c", text: "#fae8ff", textDim: "#e879f9", accent: "#22d3ee",
+                headerTitle: "#f0abfc", headerSubtitle: "#d946ef",
+                rank1: "#22d3ee", rank2: "#e879f9", rank3: "#818cf8",
+                pillBg: "rgba(88, 28, 135, 0.8)", pillBorder: "#22d3ee", footerText: "rgba(34, 211, 238, 0.3)", isDark: true
+            },
+            frost: {
+                bg: "#f0f9ff", text: "#0c4a6e", textDim: "#0369a1", accent: "#0284c7",
+                headerTitle: "#075985", headerSubtitle: "#0ea5e9",
+                rank1: "#0ea5e9", rank2: "#38bdf8", rank3: "#7dd3fc",
+                pillBg: "#e0f2fe", pillBorder: "#bae6fd", footerText: "#0369a1", isDark: false
+            },
+            blush: {
+                bg: "#fff1f2", text: "#881337", textDim: "#be123c", accent: "#e11d48",
+                headerTitle: "#9f1239", headerSubtitle: "#f43f5e",
+                rank1: "#fb7185", rank2: "#f43f5e", rank3: "#fda4af",
+                pillBg: "#ffe4e6", pillBorder: "#fecdd3", footerText: "#be123c", isDark: false
+            },
+            monochrome: {
+                bg: "#000000", text: "#ffffff", textDim: "#d4d4d4", accent: "#ffffff",
+                headerTitle: "#ffffff", headerSubtitle: "#a3a3a3",
+                rank1: "#ffffff", rank2: "#d4d4d4", rank3: "#a3a3a3",
+                pillBg: "#262626", pillBorder: "#404040", footerText: "#737373", isDark: true
+            },
+            midnight: {
+                bg: "#020617", text: "#f8fafc", textDim: "#94a3b8", accent: "#60a5fa",
+                headerTitle: "#e2e8f0", headerSubtitle: "#3b82f6",
+                rank1: "#3b82f6", rank2: "#94a3b8", rank3: "#64748b",
+                pillBg: "rgba(15, 23, 42, 0.8)", pillBorder: "#334155", footerText: "rgba(148, 163, 184, 0.3)", isDark: true
+            }
+        };
+        
+        // Template Metadata for UI
+        const TEMPLATES_CONFIG = [
+            { id: 'standard', name: 'Standard', colors: ['#000000', '#ea580c', '#fbbf24'] },
+            { id: 'cyber', name: 'Cyber', colors: ['#0f0518', '#d946ef', '#a855f7'] },
+            { id: 'minimal', name: 'Minimal', colors: ['#ffffff', '#2563eb', '#94a3b8'] },
+            { id: 'toxic', name: 'Toxic', colors: ['#050505', '#a3e635', '#4ade80'] },
+            { id: 'inferno', name: 'Inferno', colors: ['#0f0000', '#f43f5e', '#fb7185'] },
+            { id: 'oceanic', name: 'Oceanic', colors: ['#082f49', '#38bdf8', '#0ea5e9'] },
+            { id: 'royal', name: 'Royal', colors: ['#2e1065', '#fbbf24', '#c084fc'] },
+            { id: 'sunset', name: 'Sunset', colors: ['#2a0a18', '#f472b6', '#fb7185'] },
+            { id: 'tactical', name: 'Tactical', colors: ['#1c1917', '#84cc16', '#a8a29e'] },
+            { id: 'retro', name: 'Retro', colors: ['#11001c', '#22d3ee', '#e879f9'] },
+            { id: 'frost', name: 'Frost', colors: ['#f0f9ff', '#0ea5e9', '#38bdf8'] },
+            { id: 'blush', name: 'Blush', colors: ['#fff1f2', '#e11d48', '#fb7185'] },
+            { id: 'monochrome', name: 'Mono', colors: ['#000000', '#ffffff', '#a3a3a3'] },
+            { id: 'midnight', name: 'Midnight', colors: ['#020617', '#60a5fa', '#94a3b8'] }
+        ];
+
+        function getPalette() {
+            const t = styles[activeGroup].template || 'standard';
+            return PALETTES[t] || PALETTES.standard;
+        }
+
+        async function loadImage(src) {
+            return new Promise((resolve) => {
+                if(!src) resolve(null);
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = () => resolve(img);
+                img.onerror = () => resolve(null);
+                img.src = src;
+            });
+        }
+
+        function drawRoundedRect(ctx, x, y, w, h, r) {
+            if (w < 2 * r) r = w / 2;
+            if (h < 2 * r) r = h / 2;
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.arcTo(x + w, y, x + w, y + h, r);
+            ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r);
+            ctx.arcTo(x, y, x + w, y, r);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // --- Draw Header (Logo, Title, Group, Date/Time) ---
+        async function drawHeader(ctx, title, group, date, time, bgImage, logoImage, textLeft, textRight, isPresentation = false) {
+            const p = getPalette();
+
+            // Background
+            ctx.fillStyle = p.bg;
+            ctx.fillRect(0, 0, CANVAS_WIDTH, ctx.canvas.height);
+            
+            if (bgImage) {
+                const aspect = bgImage.width / bgImage.height;
+                let dh = CANVAS_WIDTH / aspect;
+                if(dh < ctx.canvas.height) {
+                    dh = ctx.canvas.height;
+                    const dw = dh * aspect;
+                     ctx.drawImage(bgImage, (CANVAS_WIDTH - dw)/2, 0, dw, dh);
+                } else {
+                     ctx.drawImage(bgImage, 0, (ctx.canvas.height - dh)/2, CANVAS_WIDTH, dh);
+                }
+                // Overlay
+                ctx.fillStyle = p.isDark ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.7)";
+                ctx.fillRect(0,0, CANVAS_WIDTH, ctx.canvas.height);
+            }
+
+            // Draw Top Texts
+            ctx.font = "italic bold 10px Inter";
+            ctx.fillStyle = p.textDim;
+            
+            ctx.textAlign = "left";
+            ctx.fillText(textLeft, 25, 25);
+
+            ctx.textAlign = "right";
+            ctx.fillText(textRight, CANVAS_WIDTH - 25, 25);
+
+            let currentY = 30;
+
+            // Tournament Logo
+            if (logoImage) {
+                const logoH = isPresentation ? 140 : 75;
+                const logoW = logoImage.width * (logoH / logoImage.height);
+                ctx.drawImage(logoImage, (CANVAS_WIDTH - logoW) / 2, currentY, logoW, logoH);
+                currentY += logoH + 20; 
+            } else {
+                currentY += 20;
+            }
+
+            // Tournament Title
+            ctx.font = FONT_GAMER;
+            ctx.fillStyle = p.headerTitle;
+            ctx.textAlign = "center";
+            ctx.fillText(title.toUpperCase(), CANVAS_WIDTH / 2, currentY + 10);
+            currentY += isPresentation ? 25 : 30;
+
+            // Subtitle
+            ctx.font = FONT_SUBTITLE;
+            ctx.fillStyle = p.headerSubtitle;
+            ctx.letterSpacing = "4px"; 
+            let subtitle = "OFFICIAL RESULTS";
+            if(ctx.canvas.id.includes("top3")) subtitle = "TOP 3 TEAMS";
+            if(ctx.canvas.id.includes("confirmed")) subtitle = "CONFIRMED TEAMS";
+            if(ctx.canvas.id.includes("presentation")) subtitle = "SEASON INFO";
+            if(ctx.canvas.id.includes("sponsors")) subtitle = "OFFICIAL PARTNERS";
+            
+            ctx.fillText(subtitle, CANVAS_WIDTH / 2, currentY);
+            currentY += isPresentation ? 20 : 20; 
+
+            // Group
+            if (group) {
+                ctx.font = "bold 10px Orbitron";
+                ctx.fillStyle = p.textDim;
+                ctx.letterSpacing = "2px";
+                
+                const groupText = (group === 'ESPECIAL' || group === '3 SALAS' || group === 'FINALS') ? group : `GROUP ${group}`;
+                ctx.fillText(groupText, CANVAS_WIDTH / 2, currentY);
+                currentY += 20; 
+            } else {
+                currentY += isPresentation ? 25 : 15;
+            }
+
+            // Date / Time Pills
+            ctx.font = "bold 10px Inter";
+            const dateStr = "📅 " + date;
+            const timeStr = "⏰ " + time;
+            
+            const dateMetrics = ctx.measureText(dateStr);
+            const timeMetrics = ctx.measureText(timeStr);
+            
+            const padding = 30; 
+            const minW = 110;
+            const dateW = Math.max(minW, dateMetrics.width + padding);
+            const timeW = Math.max(minW, timeMetrics.width + padding);
+            
+            const pillH = 24;
+            const gap = 15;
+            const totalWidth = dateW + gap + timeW;
+            const startX = (CANVAS_WIDTH - totalWidth) / 2;
+            
+            ctx.textBaseline = "middle";
+            const textY = currentY + (pillH / 2);
+
+            // Date Pill
+            ctx.fillStyle = p.pillBg;
+            ctx.strokeStyle = p.pillBorder;
+            drawRoundedRect(ctx, startX, currentY, dateW, pillH, 4);
+            ctx.stroke();
+            ctx.fillStyle = p.text; // Text inside pill always high contrast to pill bg
+            if (!p.isDark) ctx.fillStyle = p.textDim; // Fix for light mode pills
+            ctx.fillText(dateStr, startX + dateW/2, textY);
+
+            // Time Pill
+            const timeX = startX + dateW + gap;
+            ctx.fillStyle = p.pillBg;
+            drawRoundedRect(ctx, timeX, currentY, timeW, pillH, 4);
+            ctx.stroke();
+            ctx.fillStyle = p.text;
+            if (!p.isDark) ctx.fillStyle = p.textDim;
+            ctx.fillText(timeStr, timeX + timeW/2, textY);
+            
+            ctx.textBaseline = "alphabetic";
+
+            return currentY + (isPresentation ? 30 : 60);
+        }
+
+        async function drawFooter(ctx, yPosition, sponsors) {
+             const p = getPalette();
+             const footerH = 80; 
+             const startY = ctx.canvas.height - footerH;
+             
+             // Divider
+             ctx.beginPath();
+             ctx.moveTo(25, startY);
+             ctx.lineTo(CANVAS_WIDTH - 25, startY);
+             ctx.strokeStyle = p.isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)";
+             ctx.stroke();
+             
+             const centerY = startY + (footerH / 2);
+
+             // Sponsors Text
+             ctx.fillStyle = p.footerText;
+             ctx.font = "bold 12px Inter";
+             ctx.textAlign = "left";
+             ctx.textBaseline = "middle";
+             
+             const labelX = 25;
+             ctx.fillText("SPONSORS", labelX, centerY);
+             
+             const textMetrics = ctx.measureText("SPONSORS");
+             let currentX = labelX + textMetrics.width + 25;
+
+             if (sponsors && sponsors.length > 0) {
+                 const sponsorH = 50; 
+                 
+                 for (let src of sponsors) {
+                     const img = await loadImage(src);
+                     if(img) {
+                         const w = img.width * (sponsorH / img.height);
+                         ctx.drawImage(img, currentX, centerY - (sponsorH / 2), w, sponsorH);
+                         currentX += w + 20; 
+                     }
+                 }
+             }
+             ctx.textBaseline = "alphabetic";
+        }
+
+        // --- Render: Leaderboard ---
+        async function drawLeaderboard(canvas) {
+            const ctx = canvas.getContext('2d');
+            const s = styles[activeGroup];
+            const p = getPalette();
+            const bg = await loadImage(s.backgroundImage);
+            const logo = await loadImage(s.logoImage);
+            
+            const headerH = 280; 
+            const rowH = 32;
+            const rows = 12;
+            const footerH = 80; 
+            const totalH = headerH + (rows * rowH) + footerH + 20; 
+            
+            canvas.height = totalH;
+
+            let startY = await drawHeader(ctx, s.tournamentName, activeGroup, s.tournamentDate, s.tournamentTime, bg, logo, s.footerTextLeft, s.footerTextRight);
+            
+            // Header Row
+            const colRank = 40;
+            const colName = 200;
+            const colWin = 350;
+            const colKill = 410;
+            const colPts = 500;
+            
+            ctx.fillStyle = p.textDim;
+            ctx.font = "bold 10px Inter";
+            ctx.textAlign = "center";
+            ctx.fillText("B", colWin + 10, startY - 10);
+            ctx.fillText("K", colKill + 15, startY - 10);
+            ctx.fillText("P", colPts + 15, startY - 10);
+
+            // Rows
+            const teams = getAggregatedData(activeGroup);
+            const displayData = [...teams];
+            while (displayData.length < 12) displayData.push({ name: '---', booyah: 0, kills: 0, points: 0 });
+            const top12 = displayData.slice(0, 12);
+
+            for(let i=0; i<top12.length; i++) {
+                const t = top12[i];
+                const rank = i + 1;
+                const y = startY + (i * (rowH + 4)); 
+
+                // Row BG
+                let bgGradient = ctx.createLinearGradient(25, y, 525, y);
+                let borderColor = p.isDark ? "#27272a" : "#e2e8f0";
+                let rankColor = p.isDark ? "#52525b" : "#94a3b8";
+                let textColor = p.text;
+                let ptsColor = p.text;
+
+                if (rank === 1) {
+                    if (p.isDark) {
+                        bgGradient.addColorStop(0, p.rank1 + "66"); // 40%
+                        bgGradient.addColorStop(1, "rgba(0,0,0,0.4)");
+                    } else {
+                        bgGradient.addColorStop(0, p.rank1 + "33"); 
+                        bgGradient.addColorStop(1, "rgba(255,255,255,0.4)");
+                    }
+                    borderColor = p.rank1;
+                    rankColor = p.rank1;
+                    ptsColor = p.rank1;
+                } else if (rank === 2) {
+                    if (p.isDark) {
+                        bgGradient.addColorStop(0, p.rank2 + "66");
+                        bgGradient.addColorStop(1, "rgba(0,0,0,0.4)");
+                    } else {
+                         bgGradient.addColorStop(0, p.rank2 + "33");
+                         bgGradient.addColorStop(1, "rgba(255,255,255,0.4)");
+                    }
+                    borderColor = p.rank2;
+                    rankColor = p.rank2;
+                } else if (rank === 3) {
+                    if (p.isDark) {
+                        bgGradient.addColorStop(0, p.rank3 + "33");
+                        bgGradient.addColorStop(1, "rgba(0,0,0,0.4)");
+                    } else {
+                        bgGradient.addColorStop(0, p.rank3 + "33");
+                        bgGradient.addColorStop(1, "rgba(255,255,255,0.4)");
+                    }
+                    borderColor = p.rank3;
+                    rankColor = p.rank3;
+                    ptsColor = p.rank3;
+                } else {
+                    bgGradient = p.isDark ? "rgba(24, 24, 27, 0.4)" : "#ffffff";
+                }
+
+                ctx.fillStyle = bgGradient;
+                ctx.fillRect(25, y, 500, rowH);
+                
+                // Left Border
+                ctx.fillStyle = borderColor;
+                ctx.fillRect(25, y, 4, rowH);
+
+                // Rank
+                ctx.font = "italic 900 16px Inter";
+                ctx.fillStyle = rankColor;
+                ctx.textAlign = "left";
+                ctx.fillText("#" + rank, 40, y + 22);
+
+                // Logo
+                let nameX = 85;
+                if (t.logo) {
+                    const tLogo = await loadImage(t.logo);
+                    if(tLogo) {
+                        ctx.drawImage(tLogo, 80, y + 4, 20, 20);
+                        nameX = 110;
+                    }
+                }
+
+                // Name
+                ctx.font = "bold 12px Inter";
+                ctx.fillStyle = textColor;
+                ctx.fillText(t.name.toUpperCase(), nameX, y + 20);
+
+                // Stats
+                ctx.font = "bold 12px Inter";
+                ctx.textAlign = "center";
+                ctx.fillStyle = p.textDim;
+                ctx.fillText(t.booyah > 0 ? t.booyah : '-', colWin + 10, y + 20);
+                
+                ctx.fillStyle = p.text;
+                ctx.fillText(t.kills, colKill + 15, y + 20);
+
+                // PTS
+                ctx.font = "italic 900 14px Inter";
+                ctx.fillStyle = ptsColor;
+                ctx.textAlign = "center";
+                ctx.fillText(t.points, colPts + 15, y + 21);
+            }
+
+            await drawFooter(ctx, 0, s.sponsorLogos);
+        }
+
+        // --- Render: Top 3 ---
+        async function drawTop3(canvas) {
+            const ctx = canvas.getContext('2d');
+            const s = styles[activeGroup];
+            const p = getPalette();
+            const bg = await loadImage(s.backgroundImage);
+            const logo = await loadImage(s.logoImage);
+            
+            canvas.height = 600;
+
+            await drawHeader(ctx, s.tournamentName, activeGroup, s.tournamentDate, s.tournamentTime, bg, logo, s.footerTextLeft, s.footerTextRight);
+
+            const teams = getAggregatedData(activeGroup);
+            const t1 = teams[0] || { name: 'TBD', kills: 0 };
+            const t2 = teams[1] || { name: 'TBD', kills: 0 };
+            const t3 = teams[2] || { name: 'TBD', kills: 0 };
+
+            const podiumY = 480; 
+            const w1 = 150; 
+            const w2 = 130;
+            const w3 = 130;
+            const h1 = 130;
+            const h2 = 100;
+            const h3 = 80;
+
+            const cX = CANVAS_WIDTH / 2;
+            const x1 = cX - w1/2;
+            const x2 = x1 - w2 - 10;
+            const x3 = x1 + w1 + 10;
+
+            const drawPodiumBox = async (x, width, height, team, rankColor, rankName, rankNum) => {
+                const boxY = podiumY - height;
+                
+                // Gradient Box
+                const grad = ctx.createLinearGradient(x, boxY, x, podiumY);
+                // Convert hex to rgb for alpha opacity
+                const hex2rgb = (hex) => {
+                    const r = parseInt(hex.slice(1, 3), 16);
+                    const g = parseInt(hex.slice(3, 5), 16);
+                    const b = parseInt(hex.slice(5, 7), 16);
+                    return `${r},${g},${b}`;
+                };
+
+                const baseRgb = hex2rgb(rankColor);
+                if (p.isDark) {
+                     grad.addColorStop(0, `rgba(${baseRgb}, 0.6)`);
+                     grad.addColorStop(1, `rgba(${baseRgb}, 0.1)`);
+                } else {
+                     grad.addColorStop(0, `rgba(${baseRgb}, 0.8)`);
+                     grad.addColorStop(1, `rgba(${baseRgb}, 0.2)`);
+                }
+                
+                ctx.strokeStyle = rankColor;
+                
+                // Box Body
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.moveTo(x + 10, boxY);
+                ctx.lineTo(x + width - 10, boxY);
+                ctx.quadraticCurveTo(x + width, boxY, x + width, boxY + 10);
+                ctx.lineTo(x + width, podiumY);
+                ctx.lineTo(x, podiumY);
+                ctx.lineTo(x, boxY + 10);
+                ctx.quadraticCurveTo(x, boxY, x + 10, boxY);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.moveTo(x, boxY);
+                ctx.lineTo(x + width, boxY);
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Team Name
+                ctx.fillStyle = p.text;
+                ctx.font = "900 12px Orbitron";
+                ctx.textAlign = "center";
+                ctx.fillText(team.name.toUpperCase(), x + width/2, boxY + 25);
+
+                // Rank Name
+                ctx.fillStyle = rankColor;
+                ctx.font = "bold 8px Orbitron";
+                ctx.fillText(rankName.toUpperCase(), x + width/2, boxY + 38);
+
+                // Kills
+                ctx.fillStyle = p.isDark ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.8)";
+                drawRoundedRect(ctx, x + width/2 - 25, boxY + 45, 50, 16, 4);
+                ctx.fillStyle = p.text;
+                ctx.font = "bold 10px Inter";
+                ctx.fillText(team.kills + " K", x + width/2, boxY + 56);
+
+                // Logo
+                const logoSize = rankNum === 1 ? 140 : 100;
+                const logoY = boxY - logoSize + 10; 
+                
+                if (team.logo) {
+                    const img = await loadImage(team.logo);
+                    if(img) {
+                        ctx.shadowColor = rankNum === 1 ? rankColor : (p.isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)");
+                        ctx.shadowBlur = 20;
+                        const ratio = Math.min(logoSize / img.width, logoSize / img.height);
+                        const lw = img.width * ratio;
+                        const lh = img.height * ratio;
+                        ctx.drawImage(img, x + (width - lw)/2, logoY + (logoSize - lh)/2, lw, lh);
+                        ctx.shadowBlur = 0;
+                    }
+                } else {
+                    ctx.font = "900 80px Inter";
+                    ctx.fillStyle = p.isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)";
+                    ctx.fillText("🛡️", x + width/2, logoY + 80);
+                    ctx.font = "900 40px Inter";
+                    ctx.fillStyle = p.isDark ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.8)";
+                    ctx.fillText(rankNum, x + width/2, logoY + 80);
+                }
+            };
+
+            // Order: 2, 1, 3
+            await drawPodiumBox(x2, w2, h2, t2, p.rank2, "SILVER", 2);
+            await drawPodiumBox(x3, w3, h3, t3, p.rank3, "BRONZE", 3);
+            await drawPodiumBox(x1, w1, h1, t1, p.rank1, "CHAMPION", 1);
+
+            await drawFooter(ctx, 0, s.sponsorLogos);
+        }
+
+        // --- Render: Confirmed ---
+        async function drawConfirmed(canvas) {
+            const ctx = canvas.getContext('2d');
+            const s = styles[activeGroup];
+            const p = getPalette();
+            const bg = await loadImage(s.backgroundImage);
+            const logo = await loadImage(s.logoImage);
+            
+            canvas.height = 700; 
+            
+            let startY = await drawHeader(ctx, s.tournamentName, activeGroup, s.tournamentDate, s.tournamentTime, bg, logo, s.footerTextLeft, s.footerTextRight);
+            startY += 10; 
+
+            const teams = data[activeGroup] || [];
+            const displayData = [...teams];
+            while (displayData.length < 12) displayData.push({ name: '', logo: null });
+            const top12 = displayData.slice(0, 12);
+
+            // Grid Config
+            const cols = 4;
+            const gap = 10;
+            const boxSize = 100;
+            const totalGridW = (cols * boxSize) + ((cols - 1) * gap);
+            const startX = (CANVAS_WIDTH - totalGridW) / 2;
+            
+            for(let i=0; i<top12.length; i++) {
+                const t = top12[i];
+                const r = Math.floor(i / cols);
+                const c = i % cols;
+                const x = startX + c * (boxSize + gap);
+                const y = startY + r * (boxSize + gap);
+
+                // Box BG
+                ctx.fillStyle = p.isDark ? "rgba(24, 24, 27, 0.5)" : "rgba(255, 255, 255, 0.6)";
+                ctx.strokeStyle = p.pillBorder;
+                ctx.lineWidth = 1;
+                drawRoundedRect(ctx, x, y, boxSize, boxSize, 8);
+                ctx.stroke();
+
+                // Number
+                ctx.fillStyle = p.textDim;
+                ctx.font = "bold 10px Inter";
+                ctx.fillText(i + 1, x + 10, y + 15);
+
+                // Logo
+                if (t.logo) {
+                    const img = await loadImage(t.logo);
+                    if(img) {
+                        const maxS = 85;
+                        const ratio = Math.min(maxS / img.width, maxS / img.height);
+                        const w = img.width * ratio;
+                        const h = img.height * ratio;
+                        ctx.drawImage(img, x + (boxSize - w)/2, y + (boxSize - h)/2 - 5, w, h);
+                    }
+                } else {
+                     ctx.fillStyle = p.isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)";
+                     ctx.font = "40px Inter";
+                     ctx.textAlign = "center";
+                     ctx.fillText("🛡️", x + boxSize/2, y + boxSize/2 + 15);
+                     ctx.textAlign = "left"; 
+                }
+            }
+            
+            await drawFooter(ctx, 0, s.sponsorLogos);
+        }
+
+        // --- Render: Presentation (Registration Open) ---
+        async function drawPresentation(canvas) {
+            const ctx = canvas.getContext('2d');
+            const s = styles[activeGroup];
+            const p = getPalette();
+            const bg = await loadImage(s.backgroundImage);
+            const logo = await loadImage(s.logoImage);
+            
+            canvas.height = 600; 
+            
+            // Draw Header
+            let startY = await drawHeader(ctx, s.tournamentName, null, s.tournamentDate, s.tournamentTime, bg, logo, s.footerTextLeft, s.footerTextRight, true);
+            
+            const centerY = startY + 60; 
+            
+            ctx.textAlign = "center";
+            ctx.font = "900 italic 42px Orbitron, sans-serif";
+            
+            // Text 1: REGISTRATION
+            ctx.fillStyle = p.text;
+            ctx.fillText("REGISTRATION", CANVAS_WIDTH / 2, centerY - 20);
+            
+            // Text 2: OPEN
+            ctx.fillStyle = p.accent; 
+            ctx.fillText("OPEN", CANVAS_WIDTH / 2, centerY + 20);
+            
+
+            // Decorative Box around text
+            const boxW = 400;
+            const boxH = 100;
+            ctx.strokeStyle = p.accent;
+            ctx.lineWidth = 2;
+            
+            // Draw brackets style box
+            const bx = (CANVAS_WIDTH - boxW) / 2;
+            const by = centerY - 50;
+            
+            // Top Left
+            ctx.beginPath();
+            ctx.moveTo(bx + 20, by);
+            ctx.lineTo(bx, by);
+            ctx.lineTo(bx, by + 20);
+            ctx.stroke();
+
+            // Bottom Right
+            ctx.beginPath();
+            ctx.moveTo(bx + boxW - 20, by + boxH);
+            ctx.lineTo(bx + boxW, by + boxH);
+            ctx.lineTo(bx + boxW, by + boxH - 20);
+            ctx.stroke();
+
+            // PRIZES DISPLAY
+            if (s.prize1 || s.prize2 || s.prize3) {
+                 const pY = centerY + 65;
+                 ctx.font = "bold 12px Orbitron";
+                 
+                 const drawPrize = (txt, x, color) => {
+                     if(!txt) return;
+                     
+                     const tm = ctx.measureText(txt);
+                     const padding = 24; 
+                     const w = Math.max(90, tm.width + padding); 
+                     const h = 24;
+                     const bx = x - w/2;
+                     const by = pY - h/2;
+
+                     ctx.fillStyle = p.pillBg;
+                     ctx.strokeStyle = p.pillBorder;
+                     drawRoundedRect(ctx, bx, by, w, h, 4);
+                     ctx.stroke();
+
+                     ctx.fillStyle = color;
+                     
+                     ctx.textBaseline = "middle";
+                     ctx.fillText(txt, x, pY);
+                     ctx.textBaseline = "alphabetic";
+                 };
+
+                 const p1 = s.prize1 ? `🥇 ${s.prize1}` : '';
+                 const p2 = s.prize2 ? `🥈 ${s.prize2}` : '';
+                 const p3 = s.prize3 ? `🥉 ${s.prize3}` : '';
+                 
+                 ctx.textAlign = "center";
+                 
+                 if (p1) drawPrize(p1, CANVAS_WIDTH / 2, "#fbbf24"); // Gold
+                 if (p2) drawPrize(p2, CANVAS_WIDTH / 2 - 120, p.isDark ? "#e5e7eb" : "#475569"); // Silver
+                 if (p3) drawPrize(p3, CANVAS_WIDTH / 2 + 120, "#ea580c"); // Bronze
+            }
+
+            // Draw Price
+            if (s.registrationPrice) {
+                const priceY = centerY + 95; 
+                
+                ctx.font = "bold 14px Orbitron"; 
+                const priceText = `ENTRY: ${s.registrationPrice}`;
+                const tm = ctx.measureText(priceText);
+                const pillW = tm.width + 60;
+                const pillH = 36;
+                const pillX = (CANVAS_WIDTH - pillW) / 2;
+                
+                // Style for price button
+                ctx.fillStyle = "rgba(0, 48, 135, 0.8)"; 
+                ctx.strokeStyle = "#009cde";
+                ctx.lineWidth = 1;
+                drawRoundedRect(ctx, pillX, priceY, pillW, pillH, 18);
+                ctx.stroke();
+                
+                // Text
+                ctx.fillStyle = "#ffffff";
+                ctx.textAlign = "center";
+                ctx.fillText(priceText, CANVAS_WIDTH / 2, priceY + 23);
+                
+                // Paypal Label (Small) below
+                ctx.font = "italic 10px Inter";
+                ctx.fillStyle = p.textDim;
+                ctx.fillText("PAYMENT VIA PAYPAL", CANVAS_WIDTH / 2, priceY + 45);
+            }
+
+            await drawFooter(ctx, 0, s.sponsorLogos);
+        }
+
+        // --- Render: Sponsors Banner ---
+        async function drawSponsors(canvas) {
+            const ctx = canvas.getContext('2d');
+            const s = styles[activeGroup];
+            const p = getPalette();
+            const bg = await loadImage(s.backgroundImage);
+            const logo = await loadImage(s.logoImage);
+            
+            canvas.height = 600; 
+            
+            let startY = await drawHeader(ctx, s.tournamentName, null, s.tournamentDate, s.tournamentTime, bg, logo, s.footerTextLeft, s.footerTextRight, true);
+            
+            const logos = s.sponsorLogos || [];
+            
+            if(logos.length === 0) {
+                 ctx.fillStyle = p.textDim;
+                 ctx.font = "italic 20px Inter";
+                 ctx.textAlign = "center";
+                 ctx.fillText("NO SPONSORS ADDED", CANVAS_WIDTH/2, startY + 50);
+            } else {
+                const cols = 3;
+                const gap = 15;
+                const boxSize = 140; 
+                const totalW = (cols * boxSize) + ((cols-1) * gap);
+                const startX = (CANVAS_WIDTH - totalW) / 2;
+                
+                let currentY = startY + 20;
+
+                for(let i=0; i<logos.length; i++) {
+                    const r = Math.floor(i / cols);
+                    const c = i % cols;
+                    const x = startX + c * (boxSize + gap);
+                    const y = currentY + r * (boxSize + gap);
+                    
+                    // Box Background
+                    ctx.fillStyle = p.isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)";
+                    ctx.strokeStyle = p.isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)";
+                    ctx.lineWidth = 1;
+                    drawRoundedRect(ctx, x, y, boxSize, boxSize, 12);
+                    ctx.stroke();
+                    
+                    // Logo
+                    const img = await loadImage(logos[i]);
+                    if(img) {
+                        const padding = 20;
+                        const maxDim = boxSize - (padding * 2);
+                        const ratio = Math.min(maxDim / img.width, maxDim / img.height);
+                        const w = img.width * ratio;
+                        const h = img.height * ratio;
+                        
+                        ctx.drawImage(img, x + (boxSize - w)/2, y + (boxSize - h)/2, w, h);
+                    }
+                }
+            }
+
+            await drawFooter(ctx, 0, []); 
+        }
+
+        // --- Main Draw Controller ---
+        async function renderCanvas(type, containerId) {
+             const container = document.getElementById(containerId);
+             container.innerHTML = '';
+             const canvas = document.createElement('canvas');
+             canvas.width = 550;
+             canvas.id = "canvas-" + type;
+             
+             // Initial height, adjusted inside functions
+             if(type === 'results') await drawLeaderboard(canvas);
+             if(type === 'top3') await drawTop3(canvas);
+             if(type === 'confirmed') await drawConfirmed(canvas);
+             if(type === 'presentation') await drawPresentation(canvas);
+             if(type === 'sponsors') await drawSponsors(canvas); 
+             
+             // Scale down for preview if needed via CSS, but canvas stays hi-res
+             canvas.style.maxWidth = "100%";
+             canvas.style.height = "auto";
+             
+             container.appendChild(canvas);
+        }
+
+        function renderAll() {
+             renderCanvas('results', 'preview-results');
+             renderCanvas('top3', 'preview-top3');
+             renderCanvas('confirmed', 'preview-confirmed');
+             renderCanvas('presentation', 'preview-presentation');
+             renderCanvas('sponsors', 'preview-sponsors'); 
+             renderGroupButtons();
+        }
+
+        function renderTemplateSelector() {
+            const container = document.getElementById('template-grid');
+            if(!container) return;
+            
+            container.innerHTML = TEMPLATES_CONFIG.map(t => `
+                <button onclick="setTemplate('${t.id}')" id="btn-tmpl-${t.id}" class="template-btn p-2 rounded-lg border-2 border-transparent hover:border-gray-500 flex flex-col items-center gap-2 bg-[#121212] transition-colors">
+                     <div class="w-full aspect-video rounded border border-gray-800 relative overflow-hidden" style="background-color: ${t.colors[0]}">
+                        <div class="absolute inset-0 bg-gradient-to-br from-transparent to-black/20"></div>
+                        <div class="absolute bottom-1 left-1 w-3/4 h-1 rounded" style="background-color: ${t.colors[2]}"></div>
+                        <div class="absolute bottom-3 left-1 w-1/2 h-1 rounded" style="background-color: ${t.colors[1]}"></div>
+                        <div class="absolute top-1 right-1 w-2 h-2 rounded-full" style="background-color: ${t.colors[1]}"></div>
+                     </div>
+                     <span class="text-[10px] text-gray-400 font-bold uppercase">${t.name}</span>
+                </button>
+            `).join('');
+        }
+
+        function downloadCanvas(type) {
+            const canvas = document.getElementById("canvas-" + type);
+            if(canvas) {
+                const link = document.createElement('a');
+                // Use the style name of the current group
+                const cleanName = (styles[activeGroup].tournamentName || 'XT_UND').replace(/[^a-z0-9]/gi, '_');
+                link.download = `${cleanName}_${type}_${activeGroup}.png`;
+                link.href = canvas.toDataURL('image/png', 1.0); // Max quality
+                link.click();
+            }
+        }
+        
+        // Initial setup
+        window.onload = function() {
+            checkAuth();
+            // Add Team
+            document.getElementById('add-team-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const nameInput = document.getElementById('new-team-name');
+                const logoInput = document.getElementById('new-team-logo');
+                if(nameInput.value.trim()) {
+                    const newTeam = { id: Date.now().toString(), name: nameInput.value.trim(), logo: null, matches: Array(5).fill(null).map(()=>({p:'', k:''})) };
+                    const finish = () => {
+                        if(!data[activeGroup]) data[activeGroup] = [];
+                        data[activeGroup].push(newTeam);
+                        saveData(); renderTeamEditor(); renderAll();
+                        nameInput.value = ''; logoInput.value = '';
+                    };
+                    if(logoInput.files[0]) {
+                        const r = new FileReader();
+                        r.onload = (evt) => { newTeam.logo = evt.target.result; finish(); };
+                        r.readAsDataURL(logoInput.files[0]);
+                    } else finish();
+                }
+            });
+
+            // Settings Listeners
+            ['tournamentName', 'tournamentDate', 'tournamentTime', 'registrationPrice', 'footerTextLeft', 'footerTextRight', 'prize1', 'prize2', 'prize3'].forEach(id => {
+                document.getElementById(id).addEventListener('input', (e) => { 
+                    styles[activeGroup][id] = e.target.value; 
+                    saveStyles(); 
+                    renderAll(); 
+                });
+            });
+
+            // Image Uploads
+            document.getElementById('logoImage').addEventListener('change', (e) => handleImageUpload(e, 'logoImage'));
+            document.getElementById('backgroundImage').addEventListener('change', (e) => handleImageUpload(e, 'backgroundImage'));
+            document.getElementById('addSponsorInput').addEventListener('change', (e) => {
+                 if(e.target.files[0]){
+                    const r = new FileReader();
+                    r.onload = (evt) => { 
+                        if(!styles[activeGroup].sponsorLogos) styles[activeGroup].sponsorLogos=[]; 
+                        styles[activeGroup].sponsorLogos.push(evt.target.result); 
+                        saveStyles(); 
+                        renderSponsorListInSettings(); 
+                        renderAll(); 
+                        e.target.value=''; 
+                    };
+                    r.readAsDataURL(e.target.files[0]);
+                 }
+            });
+
+            // Load Data & Init
+            loadData().then(() => {
+                renderTemplateSelector(); // Generate the buttons first
+                setView('LEADERBOARD');
+                renderGroupButtons();
+            });
+        };
+
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
