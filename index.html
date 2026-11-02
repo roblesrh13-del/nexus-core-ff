@@ -1774,14 +1774,10 @@
                 ctx.quadraticCurveTo(x, boxY, x + 10, boxY);
                 ctx.fill();
                 
-                ctx.beginPath();
-                ctx.moveTo(x, boxY);
-                ctx.lineTo(x + width, boxY);
-                ctx.lineWidth = 2;
-                ctx.stroke();
+                
 
                 ctx.fillStyle = p.text;
-                ctx.font = "900 12px Orbitron";
+                ctx.font = "900 9px Orbitron";
                 ctx.textAlign = "center";
                 ctx.fillText(team.name.toUpperCase(), x + width/2, boxY + 25);
 
@@ -1792,8 +1788,8 @@
                 ctx.fillStyle = p.isDark ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.8)";
                 drawRoundedRect(ctx, x + width/2 - 25, boxY + 45, 50, 16, 4);
                 ctx.fillStyle = p.text;
-                ctx.font = "bold 10px Inter";
-                ctx.fillText(team.kills + " K", x + width/2, boxY + 56);
+                ctx.font = "bold 8px Inter";
+                ctx.fillText(team.kills + " Kills", x + width/2, boxY + 56);
 
                 const logoSize = rankNum === 1 ? 140 : 100;
                 const logoY = boxY - logoSize + 10; 
@@ -1819,9 +1815,9 @@
                 }
             };
 
-            await drawPodiumBox(x2, w2, h2, t2, p.rank2, "SILVER", 2);
-            await drawPodiumBox(x3, w3, h3, t3, p.rank3, "BRONZE", 3);
-            await drawPodiumBox(x1, w1, h1, t1, p.rank1, "CHAMPION", 1);
+            await drawPodiumBox(x2, w2, h2, t2, p.rank2, "TOP 2", 2);
+            await drawPodiumBox(x3, w3, h3, t3, p.rank3, "TOP 3", 3);
+            await drawPodiumBox(x1, w1, h1, t1, p.rank1, "TOP 1", 1);
 
             await drawFooter(ctx, 0, s.sponsorLogos);
         }
@@ -1901,13 +1897,13 @@
             const centerY = startY + 60; 
             
             ctx.textAlign = "center";
-            ctx.font = "900 italic 42px Orbitron, sans-serif";
+            ctx.font = "900 italic 40px Orbitron, sans-serif";
             
             ctx.fillStyle = p.text;
-            ctx.fillText("REGISTRATION", CANVAS_WIDTH / 2, centerY - 20);
+            ctx.fillText("REGISTRATION", CANVAS_WIDTH / 2, centerY - 17);
             
             ctx.fillStyle = p.accent; 
-            ctx.fillText("OPEN", CANVAS_WIDTH / 2, centerY + 20);
+            ctx.fillText("OPEN", CANVAS_WIDTH / 2, centerY + 17);
             
             const boxW = 400;
             const boxH = 100;
@@ -1988,7 +1984,7 @@
                 
                 ctx.font = "italic 10px Inter";
                 ctx.fillStyle = p.textDim;
-                ctx.fillText("PAYMENT VIA PAYPAL", CANVAS_WIDTH / 2, priceY + 45);
+                ctx.fillText("PAYMENT VIA PAYPAL -- BIZUM", CANVAS_WIDTH / 2, priceY + 55);
             }
 
             await drawFooter(ctx, 0, s.sponsorLogos);
